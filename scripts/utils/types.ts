@@ -1,7 +1,7 @@
 export type ContentType = 'x_article' | 'external_article' | 'company_blog_article' | 'media_article' | 'vc_article' | 'research_blog_article';
 
 export type SourcePlatform = 'x' | 'rss' | 'json_feed' | 'sitemap' | 'html_index' | 'manual' | 'hn' | 'external';
-export type DiscoveryMethod = 'rss' | 'atom' | 'json_feed' | 'sitemap' | 'html_index' | 'manual' | 'curated_x' | 'curated_external';
+export type DiscoveryMethod = 'rss' | 'atom' | 'json_feed' | 'sitemap' | 'html_index' | 'manual' | 'curated_x' | 'curated_external' | 'x_profile' | 'x_articles_tab' | 'x_search';
 
 export type Candidate = {
   id: string;
