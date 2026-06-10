@@ -11,10 +11,13 @@ const required = [
   'scripts/collect-sources.ts','scripts/fetch-public.ts','scripts/extract-links.ts','scripts/score-candidates.ts','scripts/dedupe.ts','scripts/cluster.ts','scripts/build-issue.ts','scripts/generate-site-data.ts','scripts/qa.ts',
   'src/pages/index.astro','src/pages/issues/index.astro','src/pages/issues/latest.astro','src/pages/issues/[date].astro','src/pages/sources.astro','src/pages/topics.astro','src/pages/about.astro','src/pages/search.astro','src/components/Header.astro','src/components/WechatPopover.astro','src/components/ArticleCard.astro','src/layouts/BaseLayout.astro','src/styles/global.css'
 ];
-const allowedTypes = new Set(['x_article','external_article','company_blog_article','media_article','vc_article','research_blog_article']);
+const allowedTypes = new Set(['x_article']);
 
 async function exists(file: string) { try { await fs.access(file); return true; } catch { return false; } }
 function fail(message: string) { errors.push(message); }
+function isXArticleUrl(url = '') {
+  return /^https:\/\/(x\.com|twitter\.com)\//i.test(url) && (/\/articles?\//i.test(url) || /\/i\/article/i.test(url));
+}
 
 for (const file of required) if (!(await exists(file))) fail(`Missing required file: ${file}`);
 
@@ -29,13 +32,12 @@ const issueFile = `data/issues/${issueDate}.json`;
 if (!(await exists(issueFile))) fail(`Latest issue does not exist: ${issueFile}`);
 const issue = await readJson<any>(issueFile, {});
 const rawRun = await readJson<any>(`data/raw/${issueDate}-run.json`, {});
-const candidates = await readJson<any[]>(`data/candidates/${issueDate}.json`, []);
 const selected = [...(issue.must_read || []), ...(issue.worth_reading || []), ...(issue.signal_watch || [])];
 if ((issue.metadata?.selected_count || 0) !== selected.length) fail('selected_count does not match selected arrays length');
 
 if (selected.length > 0) {
   if (rawRun.live_fetch !== true) fail('Selected latest issue must come from live_fetch=true raw run');
-  if ((rawRun.discovery_sources_scanned || 0) < 1) fail('Selected latest issue must scan at least one live discovery source');
+  if ((rawRun.discovery_sources_scanned || 0) < 1 && (rawRun.x_sources_scanned || 0) < 1) fail('Selected latest issue must scan at least one live discovery source');
 }
 
 const urls = new Set<string>();
@@ -45,8 +47,10 @@ for (const item of selected) {
   for (const field of ['title','canonical_url','summary','reason_selected','total_score','dedupe_key','source_type']) {
     if (item[field] === undefined || item[field] === null || item[field] === '') fail(`Selected item missing ${field}: ${item.title || item.id}`);
   }
-  if (!allowedTypes.has(item.content_type)) fail(`Forbidden selected content_type: ${item.content_type}`);
-  if (/thread|podcast|paper_record|github_repo|short_post|product_landing/i.test(String(item.content_type))) fail(`Forbidden primary content type surfaced: ${item.content_type}`);
+  if (!allowedTypes.has(item.content_type)) fail(`Forbidden selected content_type: ${item.content_type}. Selected primary cards must be x_article only.`);
+  if (!isXArticleUrl(item.canonical_url)) fail(`Selected item is not a verified X Article URL: ${item.canonical_url}`);
+  if (item.source_platform !== 'x') fail(`Selected item source_platform must be x: ${item.title}`);
+  if (/thread|podcast|paper_record|github_repo|short_post|product_landing|external_article|company_blog_article|media_article|vc_article|research_blog_article/i.test(String(item.content_type))) fail(`Forbidden primary content type surfaced: ${item.content_type}`);
   if (item.live_fetch !== true) fail(`Selected item is not from live fetch: ${item.title}`);
   if (item.discovery_run_date !== issueDate) fail(`Selected item discovery_run_date mismatch: ${item.title}`);
   if (item.source_platform === 'manual' || item.fetch_status === 'skipped') fail(`Selected item cannot be manual/skipped historical input: ${item.title}`);
@@ -74,8 +78,8 @@ const search = await readJson<any[]>('public/index-data/search.json', []);
 if (!Array.isArray(issues)) fail('issues index is not array');
 if (!Array.isArray(search)) fail('search index is not array');
 
-const sourcesCount = (await Promise.all(['company_sources.yaml','external_sources.yaml','media.yaml','vc_sources.yaml','research_sources.yaml','x_accounts.yaml'].map(f => loadYamlList(`data/sources/${f}`)))).flat().length;
-if (sourcesCount < 70) fail(`Sources library too small: ${sourcesCount}`);
+const sourcesCount = (await loadYamlList('data/sources/x_accounts.yaml')).length;
+if (sourcesCount < 20) fail(`X account source library too small: ${sourcesCount}`);
 
 const dailyWorkflow = await readText('.github/workflows/daily.yml');
 if (!dailyWorkflow.includes('23 22 * * *')) fail('GitHub Actions cron must be 23 22 * * * for 06:23 BJT');
@@ -84,9 +88,13 @@ if (!dailyWorkflow.includes('X_ARTICLES_REQUIRE_LIVE_SELECTED')) fail('GitHub Ac
 if (!dailyWorkflow.includes('contents: write')) fail('GitHub Actions permissions.contents must be write');
 
 const readme = await readText('README.md');
-for (const phrase of ['不使用付费 API','X paid API','合规边界','去重规则','公众号二维码','06:23']) {
+for (const phrase of ['不使用付费 API','X paid API','合规边界','去重规则','公众号二维码','06:23','只收录 X Articles','selected 主卡片只允许 x_article']) {
   if (!readme.includes(phrase)) fail(`README missing phrase: ${phrase}`);
 }
+
+const buildIssue = await readText('scripts/build-issue.ts');
+if (!buildIssue.includes("new Set(['x_article'])")) fail('build-issue must restrict allowed selected content to x_article only');
+if (!buildIssue.includes("source_platform === 'x'")) fail('build-issue must require source_platform === x for selected items');
 
 const header = await readText('src/components/Header.astro');
 const popover = await readText('src/components/WechatPopover.astro');
@@ -114,4 +122,4 @@ if (errors.length) {
   for (const e of errors) console.error(`- ${e}`);
   process.exit(1);
 }
-console.log(`QA passed: ${required.length} files, ${sourcesCount} sources, ${selected.length} selected Articles, latest ${issueDate}.`);
+console.log(`QA passed: ${required.length} files, ${sourcesCount} X account sources, ${selected.length} selected X Articles, latest ${issueDate}.`);
