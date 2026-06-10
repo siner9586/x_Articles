@@ -10,6 +10,8 @@ Daily curated high-quality **X Articles only** signal site, built as a static si
 
 ## 2. 项目定位：只收录 X Articles
 
+selected 主卡片只允许 x_article。
+
 selected 主卡片只允许一种类型：
 
 - `x_article`
