@@ -1,0 +1,24 @@
+---
+import fs from 'node:fs';
+import { parse } from 'yaml';
+import BaseLayout from '../layouts/BaseLayout.astro';
+const files = ['company_sources.yaml','external_sources.yaml','media.yaml','vc_sources.yaml','research_sources.yaml','x_accounts.yaml'];
+function list(file) {
+  const raw = fs.readFileSync(`data/sources/${file}`, 'utf8');
+  const data = parse(raw);
+  return data.sources || data.accounts || data.links || [];
+}
+const groups = files.map((file) => ({ file, items: list(file) }));
+---
+<BaseLayout title="Sources | X Articles Daily">
+  <section class="hero"><div class="container"><div class="eyebrow">Source library</div><h1>Sources</h1><p class="lead">来源库可以包含 X、RSS、公司博客、媒体、VC、研究机构、播客和社区入口；daily issue 的主卡片只允许 Articles。</p><input class="search-box" data-source-search placeholder="搜索来源、tag、机构、RSS、X 链接" /></div></section>
+  {groups.map((group) => <section class="section"><div class="container"><div class="section-head"><div><h2>{group.file.replace('.yaml','')}</h2><p>{group.items.length} entries</p></div></div><div class="source-grid" data-source-grid>{group.items.map((s) => <article class="source-card" data-source-card data-text={JSON.stringify(s).toLowerCase()}><strong>{s.name || s.display_name || s.handle}</strong><small>{s.category} · priority {s.priority}</small><small>{s.use_as || s.verify_status || 'source'}</small><div class="tags">{(s.tags || []).slice(0,6).map((tag) => <span class="tag">{tag}</span>)}</div><div class="actions" style="margin-top:12px">{s.homepage_url && <a class="button secondary" href={s.homepage_url} target="_blank">Home</a>}{s.blog_url && <a class="button secondary" href={s.blog_url} target="_blank">Blog</a>}{s.rss_url && <a class="button secondary" href={s.rss_url} target="_blank">RSS</a>}{s.x_url && <a class="button secondary" href={s.x_url} target="_blank">X</a>}</div></article>)}</div></div></section>)}
+  <script>
+    const input = document.querySelector('[data-source-search]');
+    const cards = [...document.querySelectorAll('[data-source-card]')];
+    input?.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      cards.forEach((card) => { card.style.display = !q || card.dataset.text.includes(q) ? '' : 'none'; });
+    });
+  </script>
+</BaseLayout>

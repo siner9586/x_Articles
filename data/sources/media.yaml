@@ -1,0 +1,205 @@
+sources:
+  - name: The Information AI
+    category: tech_media
+    homepage_url: https://www.theinformation.com/
+    blog_url: https://www.theinformation.com/features/ai
+    rss_url: ""
+    x_url: https://x.com/theinformation
+    priority: 84
+    crawl_mode: index_only
+    use_as: primary_article_source
+    tags: [media, ai_business]
+    notes: Some content may be paywalled; only store public metadata.
+  - name: Bloomberg Technology
+    category: business_media
+    homepage_url: https://www.bloomberg.com/technology
+    blog_url: https://www.bloomberg.com/technology
+    rss_url: https://feeds.bloomberg.com/technology/news.rss
+    x_url: https://x.com/technology
+    priority: 82
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, business, technology]
+  - name: WSJ Tech
+    category: business_media
+    homepage_url: https://www.wsj.com/news/technology
+    blog_url: https://www.wsj.com/news/technology
+    rss_url: https://feeds.a.dj.com/rss/RSSWSJD.xml
+    x_url: https://x.com/WSJTech
+    priority: 80
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, business, technology]
+    notes: Paywalled articles should be metadata-only.
+  - name: Financial Times Technology
+    category: business_media
+    homepage_url: https://www.ft.com/technology
+    blog_url: https://www.ft.com/technology
+    rss_url: https://www.ft.com/technology?format=rss
+    x_url: https://x.com/FT
+    priority: 80
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, business, technology]
+    notes: Paywalled articles should be metadata-only.
+  - name: New York Times Technology
+    category: general_media
+    homepage_url: https://www.nytimes.com/section/technology
+    blog_url: https://www.nytimes.com/section/technology
+    rss_url: https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml
+    x_url: https://x.com/nytimes
+    priority: 78
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, technology]
+  - name: The Verge AI
+    category: tech_media
+    homepage_url: https://www.theverge.com/
+    blog_url: https://www.theverge.com/ai-artificial-intelligence
+    rss_url: https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+    x_url: https://x.com/verge
+    priority: 78
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, ai, product]
+  - name: Wired AI
+    category: tech_media
+    homepage_url: https://www.wired.com/
+    blog_url: https://www.wired.com/tag/artificial-intelligence/
+    rss_url: https://www.wired.com/feed/tag/ai/latest/rss
+    x_url: https://x.com/WIRED
+    priority: 78
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, ai, culture]
+  - name: TechCrunch AI
+    category: tech_media
+    homepage_url: https://techcrunch.com/
+    blog_url: https://techcrunch.com/category/artificial-intelligence/
+    rss_url: https://techcrunch.com/category/artificial-intelligence/feed/
+    x_url: https://x.com/TechCrunch
+    priority: 76
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, startups, ai]
+  - name: VentureBeat AI
+    category: tech_media
+    homepage_url: https://venturebeat.com/
+    blog_url: https://venturebeat.com/category/ai/
+    rss_url: https://venturebeat.com/category/ai/feed/
+    x_url: https://x.com/VentureBeat
+    priority: 74
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, enterprise_ai]
+  - name: MIT Technology Review AI
+    category: tech_media
+    homepage_url: https://www.technologyreview.com/
+    blog_url: https://www.technologyreview.com/topic/artificial-intelligence/
+    rss_url: https://www.technologyreview.com/feed/
+    x_url: https://x.com/techreview
+    priority: 82
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, research, ai]
+  - name: IEEE Spectrum AI
+    category: technical_media
+    homepage_url: https://spectrum.ieee.org/
+    blog_url: https://spectrum.ieee.org/topic/artificial-intelligence/
+    rss_url: https://spectrum.ieee.org/feeds/feed.rss
+    x_url: https://x.com/IEEESpectrum
+    priority: 76
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, engineering, ai]
+  - name: Ars Technica AI
+    category: technical_media
+    homepage_url: https://arstechnica.com/
+    blog_url: https://arstechnica.com/information-technology/
+    rss_url: https://feeds.arstechnica.com/arstechnica/index
+    x_url: https://x.com/arstechnica
+    priority: 76
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, technical, ai]
+  - name: Semafor Technology
+    category: media_newsletter
+    homepage_url: https://www.semafor.com/
+    blog_url: https://www.semafor.com/technology
+    rss_url: https://www.semafor.com/rss.xml
+    x_url: https://x.com/semafor
+    priority: 74
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, technology]
+  - name: Stratechery
+    category: independent_analysis
+    homepage_url: https://stratechery.com/
+    blog_url: https://stratechery.com/
+    rss_url: https://stratechery.com/feed/
+    x_url: https://x.com/stratechery
+    priority: 86
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [strategy, business, ai]
+  - name: Platformer
+    category: independent_analysis
+    homepage_url: https://www.platformer.news/
+    blog_url: https://www.platformer.news/
+    rss_url: https://www.platformer.news/feed
+    x_url: https://x.com/platformer
+    priority: 80
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [platforms, technology, media]
+  - name: Benedict Evans
+    category: independent_analysis
+    homepage_url: https://www.ben-evans.com/
+    blog_url: https://www.ben-evans.com/benedictevans
+    rss_url: https://www.ben-evans.com/benedictevans?format=rss
+    x_url: https://x.com/benedictevans
+    priority: 82
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [strategy, analysis, technology]
+  - name: Import AI
+    category: newsletter
+    homepage_url: https://jack-clark.net/
+    blog_url: https://jack-clark.net/
+    rss_url: https://jack-clark.net/feed/
+    x_url: https://x.com/jackclarkSF
+    priority: 78
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [research, newsletter, policy]
+  - name: The Batch
+    category: newsletter
+    homepage_url: https://www.deeplearning.ai/the-batch/
+    blog_url: https://www.deeplearning.ai/the-batch/
+    rss_url: https://www.deeplearning.ai/the-batch/feed/
+    x_url: https://x.com/deeplearningai_
+    priority: 80
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [newsletter, ai, education]
+  - name: Every
+    category: independent_media
+    homepage_url: https://every.to/
+    blog_url: https://every.to/ai-and-i
+    rss_url: https://every.to/feed.xml
+    x_url: https://x.com/every
+    priority: 80
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [media, ai_product, analysis]
+  - name: Lenny's Newsletter
+    category: product_newsletter
+    homepage_url: https://www.lennysnewsletter.com/
+    blog_url: https://www.lennysnewsletter.com/
+    rss_url: https://www.lennysnewsletter.com/feed
+    x_url: https://x.com/lennysan
+    podcast_url: https://www.lennyspodcast.com/
+    priority: 78
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [product, growth, startups]

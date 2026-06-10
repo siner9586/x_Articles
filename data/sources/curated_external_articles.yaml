@@ -1,0 +1,3 @@
+links: []
+# Add manually verified public long-form external articles here when RSS discovery misses them.
+# The pipeline will score, dedupe, and reject repeats before selection.

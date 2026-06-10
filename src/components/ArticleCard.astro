@@ -1,0 +1,36 @@
+---
+const { item } = Astro.props;
+const tags = Array.isArray(item?.tags) ? item.tags.slice(0, 8) : [];
+const evidence = Array.isArray(item?.evidence_links) ? item.evidence_links.filter(Boolean).slice(0, 4) : [];
+const sourceLabel = item?.source_platform === 'x' ? 'X Article / X 发现入口' : '原文';
+---
+<article class="article-card">
+  <div class="meta-row">
+    <span class="badge">{item?.content_type || 'article'}</span>
+    <span class="badge score">综合分 {Math.round(item?.total_score || 0)}</span>
+    <span class="badge">热度 {Math.round(item?.heat_score || 0)}</span>
+  </div>
+  <h3>{item?.title || 'Untitled article'}</h3>
+  <div class="meta-row">
+    <span>{item?.author || item?.organization || 'Unknown author'}</span>
+    <span>·</span>
+    <span>{item?.published_at || '发布时间未公开'}</span>
+    <span>·</span>
+    <span>抓取 {item?.captured_at || '时间未记录'}</span>
+  </div>
+  <p>{item?.summary || '该文章只保留公开元数据，未保存完整正文。'}</p>
+  {item?.raw_text_available === false && <p class="notice">仅索引公开链接，未抓取全文。</p>}
+  <div class="detail-list">
+    <div><strong>一句话核心结论</strong>{item?.core_takeaway || '该条记录来自公开 Article 来源，等待后续抓取补充上下文。'}</div>
+    <div><strong>为什么值得看</strong>{item?.why_it_matters || item?.reason_selected || '它进入候选池是因为来源、主题或证据链与 AI 长文信号相关。'}</div>
+    <div><strong>可能影响</strong>{item?.possible_impact || '后续需要观察产品、工程或投资侧是否出现可验证进展。'}</div>
+    <div><strong>继续追踪什么</strong>{item?.what_to_watch_next || '继续追踪官方文档、benchmark、GitHub release 与复盘文章。'}</div>
+  </div>
+  <div class="tags">
+    {tags.map((tag) => <span class="tag">{tag}</span>)}
+  </div>
+  <div class="actions" style="margin-top:16px">
+    <a class="button" href={item?.canonical_url} target="_blank" rel="noopener noreferrer">{sourceLabel}</a>
+    {evidence.map((url) => <a class="button secondary" href={url} target="_blank" rel="noopener noreferrer">evidence</a>)}
+  </div>
+</article>

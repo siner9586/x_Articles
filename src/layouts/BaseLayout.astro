@@ -1,0 +1,30 @@
+---
+import Header from '../components/Header.astro';
+import '../styles/global.css';
+const { title = 'X Articles Daily', description = '每日高质量 X Articles 与 AI 长文信号。只收录 Articles，合规、轻量、可复盘。' } = Astro.props;
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/assets/wechat-qrcode.svg" />
+    <meta name="twitter:card" content="summary" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <footer class="footer">
+      <div class="container">
+        <p>X Articles Daily stores public metadata and generated commentary only. It does not use paid APIs or bypass access controls.</p>
+      </div>
+    </footer>
+  </body>
+</html>

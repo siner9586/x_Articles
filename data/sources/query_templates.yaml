@@ -1,0 +1,118 @@
+topics_en:
+  - AI agents
+  - agentic workflow
+  - multi-agent
+  - computer use
+  - AI coding
+  - software engineering agents
+  - repo-level agent
+  - reasoning model
+  - inference cost
+  - test-time compute
+  - post-training
+  - distillation
+  - synthetic data
+  - evals
+  - benchmark
+  - multimodal AI
+  - voice AI
+  - AI search
+  - AI browser
+  - vertical AI
+  - AI-native SaaS
+  - open source model
+  - robotics
+  - world models
+  - AI safety
+  - alignment
+  - AI infra
+  - GPU
+  - model serving
+  - RAG
+  - vector database
+  - context engineering
+  - prompt engineering
+  - tool use
+  - MCP
+  - product-led growth
+  - AI startup
+  - AI investment
+topics_zh:
+  - AI Agent
+  - 智能体
+  - 多智能体
+  - AI 编程
+  - AI 搜索
+  - AI 浏览器
+  - 推理模型
+  - 多模态
+  - 语音 AI
+  - 开源模型
+  - 模型评测
+  - 推理成本
+  - 合成数据
+  - 强化学习
+  - AI 基础设施
+  - 垂直 AI
+  - AI 原生应用
+  - 机器人
+  - 世界模型
+  - AI 安全
+  - 对齐
+  - 产品增长
+  - 创业公司
+  - 投资判断
+signal_words_en:
+  - why
+  - how
+  - lessons
+  - deep dive
+  - notes
+  - analysis
+  - breakdown
+  - framework
+  - playbook
+  - memo
+  - thesis
+  - roadmap
+  - launch
+  - benchmark
+  - evaluation
+  - architecture
+  - postmortem
+  - what we learned
+  - case study
+  - teardown
+signal_words_zh:
+  - 复盘
+  - 深度分析
+  - 方法论
+  - 框架
+  - 路线图
+  - 架构
+  - 评测
+  - 经验
+  - 教训
+  - 观察
+  - 趋势
+  - 为什么
+  - 如何
+  - 案例
+  - 拆解
+block_words:
+  - giveaway
+  - airdrop
+  - meme
+  - gm
+  - follow me
+  - retweet to win
+  - crypto alpha
+  - 100x
+  - 抽奖
+  - 互关
+  - 空投
+  - 暴富
+  - 割韭菜
+  - 无脑转发
+  - 速成
+  - 玄学

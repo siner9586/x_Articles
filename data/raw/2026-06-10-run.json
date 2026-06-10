@@ -1,0 +1,11 @@
+{
+  "issue_date": "2026-06-10",
+  "captured_at": "2026-06-10T22:50:11+08:00",
+  "sources_scanned": 94,
+  "rss_sources_scanned": 0,
+  "candidates_count": 0,
+  "fetch_failures": 0,
+  "errors": [],
+  "live_fetch": false,
+  "compliance": "No paid API, no X paid API, no login-wall bypass, no CAPTCHA bypass, no paywall circumvention."
+}

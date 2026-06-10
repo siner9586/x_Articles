@@ -1,0 +1,316 @@
+sources:
+  - name: OpenAI
+    category: ai_model_company
+    homepage_url: https://openai.com/
+    blog_url: https://openai.com/news/
+    rss_url: https://openai.com/news/rss.xml
+    x_url: https://x.com/OpenAI
+    priority: 100
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [model, product, safety, research]
+    notes: Official company news and long-form updates.
+  - name: Anthropic
+    category: ai_model_company
+    homepage_url: https://www.anthropic.com/
+    blog_url: https://www.anthropic.com/news
+    rss_url: https://www.anthropic.com/news/rss.xml
+    x_url: https://x.com/AnthropicAI
+    priority: 100
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [claude, agents, safety, research]
+    notes: Official news, engineering and research posts.
+  - name: Google DeepMind
+    category: ai_model_company
+    homepage_url: https://deepmind.google/
+    blog_url: https://deepmind.google/discover/blog/
+    rss_url: https://deepmind.google/blog/rss.xml
+    x_url: https://x.com/GoogleDeepMind
+    priority: 96
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [research, gemini, multimodal, science]
+    notes: Research and product articles.
+  - name: Google AI
+    category: ai_model_company
+    homepage_url: https://ai.google/
+    blog_url: https://blog.google/technology/ai/
+    rss_url: https://blog.google/technology/ai/rss/
+    x_url: https://x.com/GoogleAI
+    priority: 92
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [google, ai, product]
+    notes: Google AI official updates.
+  - name: Meta AI
+    category: ai_model_company
+    homepage_url: https://ai.meta.com/
+    blog_url: https://ai.meta.com/blog/
+    rss_url: https://ai.meta.com/blog/rss/
+    x_url: https://x.com/AIatMeta
+    priority: 92
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [llama, open_source, research]
+    notes: Meta AI blog and research/product articles.
+  - name: xAI
+    category: ai_model_company
+    homepage_url: https://x.ai/
+    blog_url: https://x.ai/news
+    rss_url: https://x.ai/rss.xml
+    x_url: https://x.com/xai
+    priority: 90
+    crawl_mode: index_only
+    use_as: primary_article_source
+    tags: [grok, model, product]
+    notes: Official xAI updates. RSS availability may need manual confirmation.
+  - name: Mistral AI
+    category: ai_model_company
+    homepage_url: https://mistral.ai/
+    blog_url: https://mistral.ai/news/
+    rss_url: https://mistral.ai/news/rss.xml
+    x_url: https://x.com/MistralAI
+    priority: 90
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [open_model, europe, model]
+    notes: Company news and model release articles.
+  - name: Cohere
+    category: ai_model_company
+    homepage_url: https://cohere.com/
+    blog_url: https://cohere.com/blog
+    rss_url: https://cohere.com/blog/rss.xml
+    x_url: https://x.com/cohere
+    priority: 86
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [enterprise, model, rag]
+    notes: Enterprise AI and model articles.
+  - name: Stability AI
+    category: ai_model_company
+    homepage_url: https://stability.ai/
+    blog_url: https://stability.ai/news
+    rss_url: https://stability.ai/news/rss.xml
+    x_url: https://x.com/StabilityAI
+    priority: 82
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [image, multimodal, model]
+    notes: Official updates and model posts.
+  - name: NVIDIA AI
+    category: ai_infra_company
+    homepage_url: https://www.nvidia.com/en-us/ai/
+    blog_url: https://blogs.nvidia.com/blog/category/deep-learning/
+    rss_url: https://blogs.nvidia.com/blog/category/deep-learning/feed/
+    x_url: https://x.com/NVIDIAAI
+    priority: 86
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [gpu, inference, infra]
+    notes: NVIDIA AI blog and deep learning posts.
+  - name: Perplexity
+    category: ai_application_company
+    homepage_url: https://www.perplexity.ai/
+    blog_url: https://www.perplexity.ai/hub/blog
+    rss_url: https://www.perplexity.ai/hub/blog/rss.xml
+    x_url: https://x.com/perplexity_ai
+    priority: 82
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [ai_search, product]
+    notes: AI search product and company posts.
+  - name: Cursor
+    category: ai_coding_company
+    homepage_url: https://www.cursor.com/
+    blog_url: https://www.cursor.com/blog
+    rss_url: https://www.cursor.com/blog/rss.xml
+    x_url: https://x.com/cursor_ai
+    priority: 86
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [ai_coding, agent, developer_tools]
+    notes: AI coding product posts and engineering notes.
+  - name: Replit
+    category: ai_coding_company
+    homepage_url: https://replit.com/
+    blog_url: https://blog.replit.com/
+    rss_url: https://blog.replit.com/feed.xml
+    x_url: https://x.com/Replit
+    priority: 80
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [ai_coding, agents, developer_tools]
+    notes: Product and engineering posts.
+  - name: Lovable
+    category: ai_builder_company
+    homepage_url: https://lovable.dev/
+    blog_url: https://lovable.dev/blog
+    rss_url: https://lovable.dev/blog/rss.xml
+    x_url: https://x.com/lovable_dev
+    priority: 78
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [ai_builder, product, startups]
+    notes: AI app builder posts; RSS availability may need manual confirmation.
+  - name: Vercel AI
+    category: ai_infra_company
+    homepage_url: https://vercel.com/ai
+    blog_url: https://vercel.com/blog
+    rss_url: https://vercel.com/atom
+    x_url: https://x.com/vercel
+    github_url: https://github.com/vercel/ai
+    priority: 82
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [ai_sdk, frontend, agents]
+    notes: AI SDK and developer platform articles.
+  - name: GitHub Copilot
+    category: ai_coding_company
+    homepage_url: https://github.com/features/copilot
+    blog_url: https://github.blog/ai-and-ml/github-copilot/
+    rss_url: https://github.blog/feed/
+    x_url: https://x.com/GitHub
+    priority: 84
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [ai_coding, copilot, repo_agent]
+    notes: Use only article posts, not repositories as selected items.
+  - name: Notion AI
+    category: ai_application_company
+    homepage_url: https://www.notion.com/product/ai
+    blog_url: https://www.notion.com/blog
+    rss_url: https://www.notion.com/blog/rss.xml
+    x_url: https://x.com/NotionHQ
+    priority: 72
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [productivity, ai_native_saas]
+    notes: Product posts and workflow articles.
+  - name: Canva AI
+    category: ai_application_company
+    homepage_url: https://www.canva.com/ai/
+    blog_url: https://www.canva.com/newsroom/news/
+    rss_url: https://www.canva.com/newsroom/news/rss.xml
+    x_url: https://x.com/canva
+    priority: 70
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [design, multimodal, product]
+    notes: AI product and newsroom articles.
+  - name: Runway
+    category: ai_application_company
+    homepage_url: https://runwayml.com/
+    blog_url: https://runwayml.com/research
+    rss_url: https://runwayml.com/research/rss.xml
+    x_url: https://x.com/runwayml
+    priority: 82
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [video, multimodal, research]
+    notes: Research and product posts.
+  - name: ElevenLabs
+    category: ai_application_company
+    homepage_url: https://elevenlabs.io/
+    blog_url: https://elevenlabs.io/blog
+    rss_url: https://elevenlabs.io/blog/rss.xml
+    x_url: https://x.com/elevenlabsio
+    priority: 80
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [voice_ai, product]
+    notes: Voice AI articles.
+  - name: Midjourney
+    category: ai_application_company
+    homepage_url: https://www.midjourney.com/
+    blog_url: https://www.midjourney.com/home
+    rss_url: ""
+    x_url: https://x.com/midjourney
+    priority: 72
+    crawl_mode: index_only
+    use_as: discovery_source
+    tags: [image, community]
+    notes: Use as discovery; select only complete public long-form posts if available.
+  - name: Hugging Face
+    category: ai_platform_company
+    homepage_url: https://huggingface.co/
+    blog_url: https://huggingface.co/blog
+    rss_url: https://huggingface.co/blog/feed.xml
+    x_url: https://x.com/huggingface
+    github_url: https://github.com/huggingface
+    priority: 90
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [open_source, models, papers]
+    notes: Blog articles can be selected; model/paper pages only evidence.
+  - name: LangChain
+    category: ai_agent_framework
+    homepage_url: https://www.langchain.com/
+    blog_url: https://blog.langchain.com/
+    rss_url: https://blog.langchain.com/rss/
+    x_url: https://x.com/LangChainAI
+    github_url: https://github.com/langchain-ai/langchain
+    priority: 84
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [agents, rag, tool_use]
+    notes: Engineering articles and product architecture posts.
+  - name: LlamaIndex
+    category: ai_agent_framework
+    homepage_url: https://www.llamaindex.ai/
+    blog_url: https://www.llamaindex.ai/blog
+    rss_url: https://www.llamaindex.ai/blog/rss.xml
+    x_url: https://x.com/llama_index
+    github_url: https://github.com/run-llama/llama_index
+    priority: 82
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [rag, agents, data]
+    notes: Blog articles selected; GitHub as evidence only.
+  - name: Microsoft AI / AutoGen
+    category: ai_agent_framework
+    homepage_url: https://www.microsoft.com/en-us/ai
+    blog_url: https://www.microsoft.com/en-us/research/blog/
+    rss_url: https://www.microsoft.com/en-us/research/feed/
+    x_url: https://x.com/MSFTResearch
+    github_url: https://github.com/microsoft/autogen
+    priority: 82
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [agents, research, enterprise]
+    notes: Research blogs may be selected; repo only evidence.
+  - name: CrewAI
+    category: ai_agent_framework
+    homepage_url: https://www.crewai.com/
+    blog_url: https://www.crewai.com/blog
+    rss_url: https://www.crewai.com/blog/rss.xml
+    x_url: https://x.com/crewAIInc
+    github_url: https://github.com/crewAIInc/crewAI
+    priority: 76
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [agents, multi_agent]
+    notes: Blog articles selected; repo only evidence.
+  - name: Browser Use
+    category: ai_agent_framework
+    homepage_url: https://browser-use.com/
+    blog_url: https://browser-use.com/posts
+    rss_url: https://browser-use.com/rss.xml
+    x_url: https://x.com/browser_use
+    github_url: https://github.com/browser-use/browser-use
+    priority: 76
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [browser_agent, tool_use]
+    notes: Blog articles selected; repository only evidence.
+  - name: Windsurf / Codeium
+    category: ai_coding_company
+    homepage_url: https://windsurf.com/
+    blog_url: https://windsurf.com/blog
+    rss_url: https://windsurf.com/blog/rss.xml
+    x_url: https://x.com/windsurf_ai
+    priority: 82
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [ai_coding, developer_tools]
+    notes: AI coding workflow articles.

@@ -1,0 +1,195 @@
+sources:
+  - name: arXiv CS AI
+    category: research_discovery
+    homepage_url: https://arxiv.org/list/cs.AI/recent
+    blog_url: https://arxiv.org/list/cs.AI/recent
+    rss_url: https://export.arxiv.org/rss/cs.AI
+    x_url: ""
+    priority: 60
+    crawl_mode: rss_then_index
+    use_as: evidence_only
+    tags: [paper, research]
+    notes: Paper records are evidence or discovery only, not selected primary cards.
+  - name: arXiv CS CL
+    category: research_discovery
+    homepage_url: https://arxiv.org/list/cs.CL/recent
+    blog_url: https://arxiv.org/list/cs.CL/recent
+    rss_url: https://export.arxiv.org/rss/cs.CL
+    priority: 60
+    crawl_mode: rss_then_index
+    use_as: evidence_only
+    tags: [paper, language_model]
+    notes: Paper records are evidence or discovery only.
+  - name: arXiv CS LG
+    category: research_discovery
+    homepage_url: https://arxiv.org/list/cs.LG/recent
+    blog_url: https://arxiv.org/list/cs.LG/recent
+    rss_url: https://export.arxiv.org/rss/cs.LG
+    priority: 60
+    crawl_mode: rss_then_index
+    use_as: evidence_only
+    tags: [paper, machine_learning]
+    notes: Paper records are evidence or discovery only.
+  - name: arXiv CS CV
+    category: research_discovery
+    homepage_url: https://arxiv.org/list/cs.CV/recent
+    blog_url: https://arxiv.org/list/cs.CV/recent
+    rss_url: https://export.arxiv.org/rss/cs.CV
+    priority: 60
+    crawl_mode: rss_then_index
+    use_as: evidence_only
+    tags: [paper, vision]
+    notes: Paper records are evidence or discovery only.
+  - name: Papers with Code
+    category: research_discovery
+    homepage_url: https://paperswithcode.com/
+    blog_url: https://paperswithcode.com/newsletter
+    rss_url: https://paperswithcode.com/rss
+    x_url: https://x.com/paperswithcode
+    priority: 62
+    crawl_mode: rss_then_index
+    use_as: discovery_source
+    tags: [paper, benchmark]
+    notes: Select only complete public articles, not paper records.
+  - name: Hugging Face Papers
+    category: research_discovery
+    homepage_url: https://huggingface.co/papers
+    blog_url: https://huggingface.co/papers
+    rss_url: ""
+    x_url: https://x.com/hf_papers
+    priority: 62
+    crawl_mode: index_only
+    use_as: discovery_source
+    tags: [papers, models]
+    notes: Paper pages are discovery only.
+  - name: OpenReview
+    category: research_discovery
+    homepage_url: https://openreview.net/
+    blog_url: https://openreview.net/
+    rss_url: ""
+    priority: 54
+    crawl_mode: index_only
+    use_as: evidence_only
+    tags: [paper, peer_review]
+    notes: Review pages are evidence only.
+  - name: Google Research Blog
+    category: research_blog_article
+    homepage_url: https://research.google/
+    blog_url: https://research.google/blog/
+    rss_url: https://research.google/blog/rss/
+    x_url: https://x.com/GoogleAI
+    priority: 84
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [research, google, ai]
+  - name: Microsoft Research Blog
+    category: research_blog_article
+    homepage_url: https://www.microsoft.com/en-us/research/
+    blog_url: https://www.microsoft.com/en-us/research/blog/
+    rss_url: https://www.microsoft.com/en-us/research/feed/
+    x_url: https://x.com/MSFTResearch
+    priority: 82
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [research, microsoft, ai]
+  - name: Meta Research
+    category: research_blog_article
+    homepage_url: https://research.facebook.com/
+    blog_url: https://research.facebook.com/blog/
+    rss_url: https://research.facebook.com/blog/rss/
+    x_url: https://x.com/AIatMeta
+    priority: 80
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [research, meta, ai]
+  - name: Stanford HAI
+    category: research_institute_article
+    homepage_url: https://hai.stanford.edu/
+    blog_url: https://hai.stanford.edu/news
+    rss_url: https://hai.stanford.edu/news/rss.xml
+    x_url: https://x.com/StanfordHAI
+    priority: 78
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [research, policy, ai]
+  - name: Berkeley BAIR
+    category: research_blog_article
+    homepage_url: https://bair.berkeley.edu/
+    blog_url: https://bair.berkeley.edu/blog/
+    rss_url: https://bair.berkeley.edu/blog/feed.xml
+    x_url: https://x.com/berkeley_ai
+    priority: 78
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [research, robotics, agents]
+  - name: MIT CSAIL
+    category: research_institute_article
+    homepage_url: https://www.csail.mit.edu/
+    blog_url: https://www.csail.mit.edu/news
+    rss_url: https://www.csail.mit.edu/rss.xml
+    x_url: https://x.com/MIT_CSAIL
+    priority: 76
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [research, mit, ai]
+  - name: CMU AI
+    category: research_institute_article
+    homepage_url: https://www.cs.cmu.edu/research/artificial-intelligence
+    blog_url: https://www.cs.cmu.edu/news
+    rss_url: https://www.cs.cmu.edu/news/rss.xml
+    x_url: https://x.com/SCSatCMU
+    priority: 74
+    crawl_mode: rss_then_index
+    use_as: primary_article_source
+    tags: [research, cmu, ai]
+  - name: GitHub Trending
+    category: technical_discovery
+    homepage_url: https://github.com/trending
+    blog_url: https://github.com/trending
+    rss_url: ""
+    x_url: ""
+    priority: 58
+    crawl_mode: index_only
+    use_as: evidence_only
+    tags: [open_source, repo]
+    notes: Repositories are evidence only; never selected as primary cards.
+  - name: Hacker News
+    category: community_discovery
+    homepage_url: https://news.ycombinator.com/
+    blog_url: https://news.ycombinator.com/
+    rss_url: https://news.ycombinator.com/rss
+    x_url: ""
+    priority: 66
+    crawl_mode: rss_then_index
+    use_as: discovery_source
+    tags: [community, discussion, discovery]
+  - name: Lobsters
+    category: community_discovery
+    homepage_url: https://lobste.rs/
+    blog_url: https://lobste.rs/t/ai
+    rss_url: https://lobste.rs/rss
+    x_url: ""
+    priority: 60
+    crawl_mode: rss_then_index
+    use_as: discovery_source
+    tags: [community, engineering]
+  - name: Reddit MachineLearning
+    category: community_discovery
+    homepage_url: https://www.reddit.com/r/MachineLearning/
+    blog_url: https://www.reddit.com/r/MachineLearning/
+    rss_url: https://www.reddit.com/r/MachineLearning/.rss
+    x_url: ""
+    priority: 58
+    crawl_mode: rss_then_index
+    use_as: discovery_source
+    tags: [community, ml]
+  - name: Reddit LocalLLaMA
+    category: community_discovery
+    homepage_url: https://www.reddit.com/r/LocalLLaMA/
+    blog_url: https://www.reddit.com/r/LocalLLaMA/
+    rss_url: https://www.reddit.com/r/LocalLLaMA/.rss
+    x_url: ""
+    priority: 58
+    crawl_mode: rss_then_index
+    use_as: discovery_source
+    tags: [community, open_models]

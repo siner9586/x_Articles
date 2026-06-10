@@ -1,0 +1,277 @@
+accounts:
+  - handle: OpenAI
+    display_name: OpenAI
+    category: ai_company_official
+    organization: OpenAI
+    role: official company account
+    homepage_url: https://openai.com/
+    x_url: https://x.com/OpenAI
+    priority: 100
+    language: en
+    notes: Official source; use as discovery for X Articles and links to OpenAI articles.
+    tags: [model, product, research, safety]
+    verify_status: public_official
+  - handle: AnthropicAI
+    display_name: Anthropic
+    category: ai_company_official
+    organization: Anthropic
+    role: official company account
+    homepage_url: https://www.anthropic.com/
+    x_url: https://x.com/AnthropicAI
+    priority: 100
+    language: en
+    notes: Official source; use as discovery for Claude and safety articles.
+    tags: [claude, agents, safety]
+    verify_status: public_official
+  - handle: GoogleDeepMind
+    display_name: Google DeepMind
+    category: ai_company_official
+    organization: Google DeepMind
+    role: official company account
+    homepage_url: https://deepmind.google/
+    x_url: https://x.com/GoogleDeepMind
+    priority: 96
+    language: en
+    notes: Official research and product signal account.
+    tags: [research, gemini, multimodal]
+    verify_status: public_official
+  - handle: GoogleAI
+    display_name: Google AI
+    category: tech_platform_official
+    organization: Google
+    role: official AI account
+    homepage_url: https://ai.google/
+    x_url: https://x.com/GoogleAI
+    priority: 92
+    language: en
+    notes: Official Google AI account.
+    tags: [google, ai, research]
+    verify_status: public_official
+  - handle: AIatMeta
+    display_name: AI at Meta
+    category: ai_company_official
+    organization: Meta
+    role: official AI account
+    homepage_url: https://ai.meta.com/
+    x_url: https://x.com/AIatMeta
+    priority: 92
+    language: en
+    notes: Official Meta AI account.
+    tags: [llama, open_source, research]
+    verify_status: public_official
+  - handle: xai
+    display_name: xAI
+    category: ai_company_official
+    organization: xAI
+    role: official company account
+    homepage_url: https://x.ai/
+    x_url: https://x.com/xai
+    priority: 90
+    language: en
+    notes: Official company account; metadata only if content is inaccessible.
+    tags: [grok, model]
+    verify_status: public_official
+  - handle: MistralAI
+    display_name: Mistral AI
+    category: ai_company_official
+    organization: Mistral AI
+    role: official company account
+    homepage_url: https://mistral.ai/
+    x_url: https://x.com/MistralAI
+    priority: 90
+    language: en
+    notes: Official company account.
+    tags: [open_models, model]
+    verify_status: public_official
+  - handle: cohere
+    display_name: Cohere
+    category: ai_company_official
+    organization: Cohere
+    role: official company account
+    homepage_url: https://cohere.com/
+    x_url: https://x.com/cohere
+    priority: 86
+    language: en
+    notes: Official account.
+    tags: [enterprise_ai, rag]
+    verify_status: public_official
+  - handle: StabilityAI
+    display_name: Stability AI
+    category: ai_company_official
+    organization: Stability AI
+    role: official company account
+    homepage_url: https://stability.ai/
+    x_url: https://x.com/StabilityAI
+    priority: 82
+    language: en
+    notes: Official account.
+    tags: [image, model]
+    verify_status: public_official
+  - handle: NVIDIAAI
+    display_name: NVIDIA AI
+    category: tech_platform_official
+    organization: NVIDIA
+    role: official AI account
+    homepage_url: https://www.nvidia.com/en-us/ai/
+    x_url: https://x.com/NVIDIAAI
+    priority: 86
+    language: en
+    notes: Official AI account.
+    tags: [gpu, inference, ai_infra]
+    verify_status: public_official
+  - handle: huggingface
+    display_name: Hugging Face
+    category: ai_open_source_maintainer
+    organization: Hugging Face
+    role: official platform account
+    homepage_url: https://huggingface.co/
+    x_url: https://x.com/huggingface
+    priority: 90
+    language: en
+    notes: Official account; use posts as discovery for blog/articles.
+    tags: [open_source, models, papers]
+    verify_status: public_official
+  - handle: LangChainAI
+    display_name: LangChain
+    category: ai_open_source_maintainer
+    organization: LangChain
+    role: official framework account
+    homepage_url: https://www.langchain.com/
+    x_url: https://x.com/LangChainAI
+    priority: 84
+    language: en
+    notes: Official account; repository links only evidence.
+    tags: [agents, rag, framework]
+    verify_status: public_official
+  - handle: llama_index
+    display_name: LlamaIndex
+    category: ai_open_source_maintainer
+    organization: LlamaIndex
+    role: official framework account
+    homepage_url: https://www.llamaindex.ai/
+    x_url: https://x.com/llama_index
+    priority: 82
+    language: en
+    notes: Official account; use articles as primary, GitHub as evidence.
+    tags: [rag, agents]
+    verify_status: public_official
+  - handle: cursor_ai
+    display_name: Cursor
+    category: ai_product_leader
+    organization: Cursor
+    role: official product account
+    homepage_url: https://www.cursor.com/
+    x_url: https://x.com/cursor_ai
+    priority: 86
+    language: en
+    notes: Official product account; use linked articles and release essays.
+    tags: [ai_coding, repo_agent]
+    verify_status: public_official
+  - handle: perplexity_ai
+    display_name: Perplexity
+    category: ai_product_leader
+    organization: Perplexity
+    role: official product account
+    homepage_url: https://www.perplexity.ai/
+    x_url: https://x.com/perplexity_ai
+    priority: 82
+    language: en
+    notes: Official product account.
+    tags: [ai_search, browser]
+    verify_status: public_official
+  - handle: a16z
+    display_name: a16z
+    category: ai_investor
+    organization: Andreessen Horowitz
+    role: official firm account
+    homepage_url: https://a16z.com/
+    x_url: https://x.com/a16z
+    priority: 88
+    language: en
+    notes: Use as discovery for essays and investment thesis articles.
+    tags: [vc, investment, startups]
+    verify_status: public_official
+  - handle: sequoia
+    display_name: Sequoia Capital
+    category: ai_investor
+    organization: Sequoia Capital
+    role: official firm account
+    homepage_url: https://www.sequoiacap.com/
+    x_url: https://x.com/sequoia
+    priority: 86
+    language: en
+    notes: Use as discovery for essays and founder content.
+    tags: [vc, startups]
+    verify_status: public_official
+  - handle: TechCrunch
+    display_name: TechCrunch
+    category: ai_media_journalist
+    organization: TechCrunch
+    role: official media account
+    homepage_url: https://techcrunch.com/
+    x_url: https://x.com/TechCrunch
+    priority: 76
+    language: en
+    notes: Official media account; articles only.
+    tags: [media, startups]
+    verify_status: public_official
+  - handle: latentspacepod
+    display_name: Latent Space
+    category: ai_podcast_host
+    organization: Latent Space
+    role: podcast/newsletter account
+    homepage_url: https://www.latent.space/
+    x_url: https://x.com/latentspacepod
+    priority: 72
+    language: en
+    notes: Discovery only for article writeups and show notes; podcast episodes are not selected as primary content.
+    tags: [podcast, newsletter, ai_engineering]
+    verify_status: needs_manual_confirmation
+  - handle: orange_ai_cn
+    display_name: TODO Chinese AI commentator candidate
+    category: chinese_ai_commentator
+    organization: TODO
+    role: TODO manual confirmation required
+    homepage_url: ""
+    x_url: https://x.com/orange_ai_cn
+    priority: 50
+    language: zh
+    notes: Placeholder to demonstrate category; verify identity and quality before using in production.
+    tags: [chinese_ai_commentator, todo]
+    verify_status: needs_manual_confirmation
+  - handle: TODO_ai_researcher
+    display_name: TODO AI researcher account
+    category: ai_researcher
+    organization: TODO
+    role: TODO manual confirmation required
+    homepage_url: ""
+    x_url: ""
+    priority: 40
+    language: en
+    notes: Add only after public account and role are manually verified.
+    tags: [todo, researcher]
+    verify_status: needs_manual_confirmation
+  - handle: TODO_ai_engineer
+    display_name: TODO AI engineer account
+    category: ai_engineer
+    organization: TODO
+    role: TODO manual confirmation required
+    homepage_url: ""
+    x_url: ""
+    priority: 40
+    language: en
+    notes: Add only after public account and role are manually verified.
+    tags: [todo, engineer]
+    verify_status: needs_manual_confirmation
+  - handle: TODO_ai_builder
+    display_name: TODO AI builder account
+    category: ai_builder
+    organization: TODO
+    role: TODO manual confirmation required
+    homepage_url: ""
+    x_url: ""
+    priority: 40
+    language: en
+    notes: Add only after public account and article quality are manually verified.
+    tags: [todo, builder]
+    verify_status: needs_manual_confirmation

@@ -1,0 +1,69 @@
+---
+import ArticleCard from './ArticleCard.astro';
+const { issue } = Astro.props;
+const sections = [
+  ['Must Read', issue?.must_read || []],
+  ['Worth Reading', issue?.worth_reading || []],
+  ['Signal Watch', issue?.signal_watch || []]
+];
+---
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow">Latest issue · {issue?.metadata?.issue_date}</div>
+      <h1>X Articles Daily</h1>
+      <p class="lead">{issue?.summary?.one_liner}</p>
+      <div class="actions">
+        <a class="button" href="/issues/">历史归档</a>
+        <a class="button secondary" href="/sources/">来源库</a>
+        <a class="button secondary" href="/search/">静态搜索</a>
+      </div>
+    </div>
+    <aside class="panel">
+      <h3>本期指标</h3>
+      <div class="stats">
+        <div class="stat"><strong>{issue?.metadata?.sources_scanned || 0}</strong><span>sources tracked</span></div>
+        <div class="stat"><strong>{issue?.metadata?.candidates_count || 0}</strong><span>candidates scanned</span></div>
+        <div class="stat"><strong>{issue?.metadata?.selected_count || 0}</strong><span>selected today</span></div>
+        <div class="stat"><strong>{issue?.metadata?.duplicates_blocked || 0}</strong><span>duplicates blocked</span></div>
+        <div class="stat"><strong>{issue?.metadata?.fetch_failures || 0}</strong><span>fetch failures</span></div>
+        <div class="stat"><strong>06:12</strong><span>BJT daily</span></div>
+      </div>
+    </aside>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    {issue?.metadata?.is_initial_source_index && <div class="notice">本期为初始来源索引，不是每日新闻，不是真实抓取趋势，也不是 selected Article 榜单。它用于验证来源库、合规边界、站点结构和自动更新流水线。</div>}
+    <div class="grid" style="margin-top:18px">
+      <div class="panel"><h3>本期主要趋势</h3>{(issue?.summary?.main_trends || []).map((t) => <p>{t}</p>)}</div>
+      <div class="panel"><h3>本期值得追踪方向</h3>{(issue?.summary?.what_to_watch || []).map((t) => <p>{t}</p>)}</div>
+    </div>
+  </div>
+</section>
+{sections.map(([title, items]) => items.length > 0 && (
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><div><h2>{title}</h2><p>默认综合排序；热度只占总分 10%。</p></div></div>
+      <div class="grid">{items.map((item) => <ArticleCard item={item} />)}</div>
+    </div>
+  </section>
+))}
+{issue?.metadata?.is_initial_source_index && (
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><div><h2>初始来源索引</h2><p>这些是 source entries，不是 selected Articles。</p></div></div>
+      <div class="source-grid">
+        {(issue?.source_index || []).map((s) => <div class="source-card"><strong>{s.name}</strong><small>{s.category} · priority {s.priority}</small><small>{s.use_as}</small><div class="tags">{(s.tags || []).slice(0, 5).map((tag) => <span class="tag">{tag}</span>)}</div></div>)}
+      </div>
+    </div>
+  </section>
+)}
+{issue?.hot_rank?.length > 0 && (
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><div><h2>热度排序入口</h2><p>用于对照，不改变默认综合排序。</p></div></div>
+      <div class="grid">{issue.hot_rank.slice(0, 6).map((item) => <ArticleCard item={item} />)}</div>
+    </div>
+  </section>
+)}

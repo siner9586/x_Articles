@@ -1,0 +1,19 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import IssueView from '../../components/IssueView.astro';
+export function getStaticPaths() {
+  const dir = path.resolve('data/issues');
+  const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith('.json')) : [];
+  return files.map((file) => {
+    const date = file.replace('.json', '');
+    const issue = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf8'));
+    return { params: { date }, props: { issue } };
+  });
+}
+const { issue } = Astro.props;
+---
+<BaseLayout title={`Issue ${issue.metadata.issue_date} | X Articles Daily`}>
+  <IssueView issue={issue} />
+</BaseLayout>

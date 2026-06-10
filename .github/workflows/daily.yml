@@ -1,0 +1,53 @@
+name: Daily X Articles
+
+on:
+  schedule:
+    - cron: '12 22 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-x-articles
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Run daily pipeline
+        env:
+          TZ: Asia/Shanghai
+          X_ARTICLES_FETCH_LIVE: 'true'
+        run: npm run daily
+      - name: QA again
+        env:
+          TZ: Asia/Shanghai
+        run: npm run qa
+      - name: Build again
+        run: npm run build
+      - name: Commit changes
+        shell: bash
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            DATE=$(TZ=Asia/Shanghai date +'%Y-%m-%d')
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data content public/index-data
+            git commit -m "chore: update x articles for ${DATE}"
+            git push
+          else
+            echo "No new content changes to commit."
+          fi

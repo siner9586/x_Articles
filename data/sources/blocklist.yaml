@@ -1,0 +1,18 @@
+blocked_domains:
+  - bit.ly
+  - t.co
+  - tinyurl.com
+  - linktr.ee
+blocked_content_types:
+  - short_post
+  - pure_thread
+  - podcast_episode
+  - paper_record
+  - github_repo
+  - product_landing_page
+rules:
+  - Do not select ordinary short posts or pure threads as primary cards.
+  - Do not select podcast single episodes as primary cards; use them only as evidence or discovery.
+  - Do not select arXiv/OpenReview paper records as primary cards unless the source points to a complete public analysis article.
+  - Do not select GitHub repositories as primary cards; use releases and repos only as evidence links.
+  - Reject engagement farming, giveaways, airdrops, memes, and unverified rumor posts.

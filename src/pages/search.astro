@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Search | X Articles Daily">
+  <section class="hero"><div class="container"><div class="eyebrow">Static search</div><h1>Search</h1><p class="lead">支持标题、作者、来源、标签、机构与 topic 的本地静态搜索。</p><input class="search-box" data-search placeholder="输入 AI Agent、Cursor、OpenAI、投资判断等关键词" /></div></section>
+  <section class="section"><div class="container"><div class="source-grid" data-results></div></div></section>
+  <script>
+    const input = document.querySelector('[data-search]');
+    const results = document.querySelector('[data-results]');
+    let data = [];
+    function render(q = '') {
+      const query = q.trim().toLowerCase();
+      const items = !query ? data.slice(0, 24) : data.filter((item) => JSON.stringify(item).toLowerCase().includes(query)).slice(0, 60);
+      results.innerHTML = items.map((item) => `<a class="source-card" href="${item.url}" target="_blank" rel="noopener noreferrer"><strong>${item.title}</strong><small>${item.organization || item.author || item.source_domain || ''} · ${item.issue_date}</small><p>${item.summary || ''}</p><div class="tags">${(item.tags || []).slice(0,5).map((t) => `<span class="tag">${t}</span>`).join('')}</div></a>`).join('') || '<div class="notice">没有匹配结果。</div>';
+    }
+    fetch('/index-data/search.json').then((r) => r.json()).then((json) => { data = json; render(''); });
+    input?.addEventListener('input', () => render(input.value));
+  </script>
+</BaseLayout>
