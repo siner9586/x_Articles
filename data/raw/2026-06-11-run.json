@@ -1,0 +1,40 @@
+{
+  "issue_date": "2026-06-11",
+  "captured_at": "2026-06-11T01:44:58+08:00",
+  "sources_scanned": 23,
+  "live_sources_scanned": 89,
+  "candidates_count": 0,
+  "fetch_failures": 3,
+  "errors": [
+    {
+      "source": "AIatMeta",
+      "phase": "x_public_scan",
+      "url": "https://x.com/AIatMeta",
+      "error": "timeout"
+    },
+    {
+      "source": "GoogleDeepMind",
+      "phase": "x_public_scan",
+      "url": "https://x.com/GoogleDeepMind/articles",
+      "error": "timeout"
+    },
+    {
+      "source": "TODO_ai_builder",
+      "phase": "x_public_scan",
+      "url": "https://x.com/TODO_ai_builder/articles",
+      "error": "timeout"
+    }
+  ],
+  "live_fetch": true,
+  "x_sources_attempted": 92,
+  "x_sources_scanned": 89,
+  "x_profile_pages_attempted": 92,
+  "x_profile_pages_scanned": 89,
+  "x_article_urls_found": 0,
+  "curated_x_candidates": 0,
+  "x_article_metadata_fetches": 0,
+  "discovery_sources_attempted": 92,
+  "discovery_sources_scanned": 89,
+  "selected_policy": "x_article_only",
+  "compliance": "X Articles only. No paid API, no X paid API, no login-wall bypass, no CAPTCHA bypass, no Cloudflare bypass, no paywall circumvention, no full copyrighted article body storage."
+}
