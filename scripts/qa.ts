@@ -28,9 +28,15 @@ const issueDate = latest?.metadata?.issue_date || beijingDate();
 const issueFile = `data/issues/${issueDate}.json`;
 if (!(await exists(issueFile))) fail(`Latest issue does not exist: ${issueFile}`);
 const issue = await readJson<any>(issueFile, {});
+const rawRun = await readJson<any>(`data/raw/${issueDate}-run.json`, {});
 const candidates = await readJson<any[]>(`data/candidates/${issueDate}.json`, []);
 const selected = [...(issue.must_read || []), ...(issue.worth_reading || []), ...(issue.signal_watch || [])];
 if ((issue.metadata?.selected_count || 0) !== selected.length) fail('selected_count does not match selected arrays length');
+
+if (selected.length > 0) {
+  if (rawRun.live_fetch !== true) fail('Selected latest issue must come from live_fetch=true raw run');
+  if ((rawRun.discovery_sources_scanned || 0) < 1) fail('Selected latest issue must scan at least one live discovery source');
+}
 
 const urls = new Set<string>();
 const keys = new Set<string>();
@@ -41,6 +47,9 @@ for (const item of selected) {
   }
   if (!allowedTypes.has(item.content_type)) fail(`Forbidden selected content_type: ${item.content_type}`);
   if (/thread|podcast|paper_record|github_repo|short_post|product_landing/i.test(String(item.content_type))) fail(`Forbidden primary content type surfaced: ${item.content_type}`);
+  if (item.live_fetch !== true) fail(`Selected item is not from live fetch: ${item.title}`);
+  if (item.discovery_run_date !== issueDate) fail(`Selected item discovery_run_date mismatch: ${item.title}`);
+  if (item.source_platform === 'manual' || item.fetch_status === 'skipped') fail(`Selected item cannot be manual/skipped historical input: ${item.title}`);
   if (urls.has(item.canonical_url)) fail(`Duplicate selected URL: ${item.canonical_url}`);
   urls.add(item.canonical_url);
   if (keys.has(item.dedupe_key)) fail(`Duplicate selected dedupe_key: ${item.dedupe_key}`);
@@ -69,17 +78,20 @@ const sourcesCount = (await Promise.all(['company_sources.yaml','external_source
 if (sourcesCount < 70) fail(`Sources library too small: ${sourcesCount}`);
 
 const dailyWorkflow = await readText('.github/workflows/daily.yml');
-if (!dailyWorkflow.includes('12 22 * * *')) fail('GitHub Actions cron must be 12 22 * * *');
+if (!dailyWorkflow.includes('23 22 * * *')) fail('GitHub Actions cron must be 23 22 * * * for 06:23 BJT');
+if (!dailyWorkflow.includes('X_ARTICLES_FETCH_LIVE')) fail('GitHub Actions must set X_ARTICLES_FETCH_LIVE');
+if (!dailyWorkflow.includes('X_ARTICLES_REQUIRE_LIVE_SELECTED')) fail('GitHub Actions must set X_ARTICLES_REQUIRE_LIVE_SELECTED');
 if (!dailyWorkflow.includes('contents: write')) fail('GitHub Actions permissions.contents must be write');
 
 const readme = await readText('README.md');
-for (const phrase of ['不使用付费 API','X paid API','合规边界','去重规则','公众号二维码']) {
+for (const phrase of ['不使用付费 API','X paid API','合规边界','去重规则','公众号二维码','06:23']) {
   if (!readme.includes(phrase)) fail(`README missing phrase: ${phrase}`);
 }
 
 const header = await readText('src/components/Header.astro');
 const popover = await readText('src/components/WechatPopover.astro');
 const globalCss = await readText('src/styles/global.css');
+if (!header.includes('06:23')) fail('Header must show 06:23 BJT');
 if (!popover.includes('/assets/wechat-qrcode.svg')) fail('WechatPopover must reference /assets/wechat-qrcode.svg');
 if (/base64/i.test(header + popover)) fail('Header/WechatPopover must not contain base64');
 if (!popover.includes('hidden') || !popover.includes('click')) fail('WechatPopover must default hidden and toggle on click');

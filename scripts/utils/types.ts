@@ -1,10 +1,13 @@
 export type ContentType = 'x_article' | 'external_article' | 'company_blog_article' | 'media_article' | 'vc_article' | 'research_blog_article';
 
+export type SourcePlatform = 'x' | 'rss' | 'json_feed' | 'sitemap' | 'html_index' | 'manual' | 'hn' | 'external';
+export type DiscoveryMethod = 'rss' | 'atom' | 'json_feed' | 'sitemap' | 'html_index' | 'manual' | 'curated_x' | 'curated_external';
+
 export type Candidate = {
   id: string;
   canonical_url: string;
   source_url: string;
-  source_platform: 'x' | 'rss' | 'sitemap' | 'manual' | 'hn' | 'external';
+  source_platform: SourcePlatform;
   source_type: string;
   source_domain: string;
   content_type: ContentType;
@@ -17,6 +20,11 @@ export type Candidate = {
   language?: string;
   published_at?: string;
   captured_at: string;
+  discovery_run_date?: string;
+  discovery_method?: DiscoveryMethod;
+  live_fetch?: boolean;
+  first_seen_key?: string;
+  lastmod?: string;
   summary?: string;
   excerpt?: string;
   raw_text_available: boolean;

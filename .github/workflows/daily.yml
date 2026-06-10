@@ -2,7 +2,7 @@ name: Daily X Articles
 
 on:
   schedule:
-    - cron: '12 22 * * *'
+    - cron: '23 22 * * *'
   workflow_dispatch:
 
 permissions:
@@ -31,10 +31,12 @@ jobs:
         env:
           TZ: Asia/Shanghai
           X_ARTICLES_FETCH_LIVE: 'true'
+          X_ARTICLES_REQUIRE_LIVE_SELECTED: 'true'
         run: npm run daily
       - name: QA again
         env:
           TZ: Asia/Shanghai
+          X_ARTICLES_REQUIRE_LIVE_SELECTED: 'true'
         run: npm run qa
       - name: Build again
         run: npm run build

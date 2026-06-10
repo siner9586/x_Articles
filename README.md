@@ -64,7 +64,7 @@ npm run qa
 npm run build
 ```
 
-GitHub Actions 中会设置 `X_ARTICLES_FETCH_LIVE=true` 执行真实公开 RSS/Atom 抓取；本地未设置该变量时会生成稳定的初始来源索引，避免本地网络不可用导致失败。优先抓取 RSS / Atom 和公开 blog index。正文抓取失败不会导致 workflow 失败；失败来源会进入 `data/raw/YYYY-MM-DD-run.json` 的 errors。脚本不会绕过登录墙、付费墙、验证码、反爬或 Cloudflare。
+GitHub Actions 中会设置 `X_ARTICLES_FETCH_LIVE=true` 和 `X_ARTICLES_REQUIRE_LIVE_SELECTED=true` 执行当日真实公开抓取；本地未设置该变量时只允许生成稳定的初始来源索引，不能产出 selected 主卡片。抓取优先级为 RSS / Atom、JSON Feed、公开 sitemap、公开 blog index / HTML index，再读取公开网页元数据。正文抓取失败不会导致 workflow 失败；失败来源会进入 `data/raw/YYYY-MM-DD-run.json` 的 errors。脚本不会绕过登录墙、付费墙、验证码、反爬、rate limit 或 Cloudflare。
 
 ## 7. X 使用边界
 
@@ -114,16 +114,16 @@ site_fit_score * 0.10
 - external URL
 - cluster ID
 
-每次生成新一期前读取 `data/archive/used_items.json`。如果候选内容的 canonical URL、dedupe key、title hash 或 cluster ID 已存在于历史 used items，不得进入 selected。第二期不得重复第一期，第三期不得重复第一期和第二期，后续同理。旧内容可以作为 background source，但不能作为最新一期主内容。
+每次生成新一期前读取 `data/archive/used_items.json`。如果候选内容的 canonical URL、dedupe key、title hash 或 cluster ID 已存在于历史 used items，不得进入 selected。第二期不得重复第一期，第三期不得重复第一期和第二期，后续同理。最新一期 selected 主卡片还必须满足：`live_fetch === true`、`discovery_run_date === issue_date`、`source_platform !== manual`、`fetch_status !== skipped`。旧内容可以作为 background source，但不能作为最新一期主内容。
 
 ## 10. 每日更新规则
 
 GitHub Actions 文件：`.github/workflows/daily.yml`。
 
-北京时间每天 06:12 自动运行。GitHub Actions 使用 UTC，因此 cron 为：
+北京时间每天 06:23 自动运行。GitHub Actions 使用 UTC，因此 cron 为：
 
 ```yaml
-12 22 * * *
+23 22 * * *
 ```
 
 workflow 支持 `workflow_dispatch` 手动触发。commit message：
@@ -220,7 +220,7 @@ GitHub Pages：启用 Pages，source 选择 GitHub Actions，由 `.github/workfl
 
 ## 19. QA 检查
 
-`npm run qa` 检查必要文件、YAML/JSON 可解析、latest 指向真实日期、selected_count、Article 类型、重复 URL、重复 dedupe_key、历史重复、搜索索引、GitHub Actions cron、README 合规说明、公众号二维码路径、弹层默认隐藏、移动端水平居中和页面中不出现占位符。
+`npm run qa` 检查必要文件、YAML/JSON 可解析、latest 指向真实日期、selected_count、Article 类型、重复 URL、重复 dedupe_key、历史重复、搜索索引、GitHub Actions cron、当日 live fetch selected 强约束、README 合规说明、公众号二维码路径、弹层默认隐藏、移动端水平居中和页面中不出现占位符。
 
 ## 20. 公众号二维码组件说明
 
@@ -250,7 +250,7 @@ Header / 组件只引用 `/assets/wechat-qrcode.svg`。不在组件中写 base64
 
 ## 22. 后续路线图
 
-- 增加更精细的 sitemap discovery。
+- 持续扩展合规 sitemap / HTML index discovery 与来源健康度监控。
 - 增加人工审核命令，允许手动提升或降权候选。
 - 为来源添加 last_success_at 和 fetch health。
 - 增加 topic cluster 可视化。
