@@ -3,22 +3,14 @@ import { ensureDir, loadYamlList, readText, writeJson } from './utils/fs.js';
 import { beijingDate, beijingISOString } from './utils/time.js';
 import { cleanText, containsAny, sha1, unique } from './utils/text.js';
 import { getDomain, makeDedupeKey, normalizeUrl, titleHash } from './dedupe.js';
-import { fetchText, parseFeed, parseSitemapUrls, extractHtmlMeta } from './fetch-public.js';
-import { extractHrefLinks, extractLinks, isLikelyArticleUrl } from './extract-links.js';
+import { fetchText, extractHtmlMeta } from './fetch-public.js';
+import { extractHrefLinks, extractLinks } from './extract-links.js';
 import { assignCluster } from './cluster.js';
-import type { Candidate, ContentType, DiscoveryMethod, SourcePlatform } from './utils/types.js';
+import type { Candidate, DiscoveryMethod } from './utils/types.js';
 
 const issueDate = process.env.ISSUE_DATE || beijingDate();
 const capturedAt = beijingISOString();
 const liveFetch = process.env.X_ARTICLES_FETCH_LIVE === 'true';
-const allowCuratedInputs = process.env.X_ARTICLES_ALLOW_CURATED_INPUTS === 'true';
-const sourceFiles = [
-  'data/sources/company_sources.yaml',
-  'data/sources/external_sources.yaml',
-  'data/sources/media.yaml',
-  'data/sources/vc_sources.yaml',
-  'data/sources/research_sources.yaml'
-];
 
 const queryRaw = parse(await readText('data/sources/query_templates.yaml', '{}')) || {};
 const topics = [...(queryRaw.topics_en || []), ...(queryRaw.topics_zh || [])];
@@ -26,36 +18,50 @@ const signalWords = [...(queryRaw.signal_words_en || []), ...(queryRaw.signal_wo
 const blockWords = [...(queryRaw.block_words || [])];
 
 const stats = {
-  rss_sources_attempted: 0,
-  rss_sources_scanned: 0,
-  sitemap_sources_attempted: 0,
-  sitemap_sources_scanned: 0,
-  html_index_sources_attempted: 0,
-  html_index_sources_scanned: 0,
-  article_metadata_fetches: 0
+  x_sources_attempted: 0,
+  x_sources_scanned: 0,
+  x_profile_pages_attempted: 0,
+  x_profile_pages_scanned: 0,
+  x_article_urls_found: 0,
+  curated_x_candidates: 0,
+  x_article_metadata_fetches: 0
 };
 
-function contentTypeFor(source: any): ContentType | '' {
-  const cat = `${source.category || ''} ${source.name || ''}`.toLowerCase();
-  if (source.use_as === 'evidence_only') return '';
-  if (cat.includes('media') || cat.includes('newsletter') || cat.includes('analysis')) return 'media_article';
-  if (cat.includes('vc') || cat.includes('startup')) return 'vc_article';
-  if (cat.includes('research')) return 'research_blog_article';
-  if (cat.includes('company') || cat.includes('framework') || cat.includes('platform')) return 'company_blog_article';
-  return 'external_article';
+function isXDomain(url = ''): boolean {
+  const domain = getDomain(url);
+  return domain === 'x.com' || domain === 'twitter.com';
+}
+
+function isXArticleUrl(url = ''): boolean {
+  const normalized = normalizeUrl(url);
+  if (!isXDomain(normalized)) return false;
+  return /\/i\/article\/[A-Za-z0-9_-]+/i.test(normalized) || /\/[^/?#]+\/articles?\/[A-Za-z0-9_-]+/i.test(normalized);
+}
+
+function normalizeXArticleUrl(url = ''): string {
+  const normalized = normalizeUrl(url);
+  if (!isXArticleUrl(normalized)) return '';
+  return normalized.replace(/^https:\/\/twitter\.com\//i, 'https://x.com/');
+}
+
+function extractXArticleUrls(html = '', baseUrl = ''): string[] {
+  const hrefs = extractHrefLinks(html, baseUrl);
+  const rawUrls = extractLinks(html);
+  const encoded = [...html.matchAll(/https?:\\?\/\\?\/(?:x|twitter)\.com\\?\/[^\s"'<>]+/gi)].map(m => m[0].replace(/\\\//g, '/'));
+  return unique([...hrefs, ...rawUrls, ...encoded]
+    .map(normalizeXArticleUrl)
+    .filter(Boolean));
 }
 
 function inferTopics(title: string, description: string): string[] {
   const text = `${title} ${description}`.toLowerCase();
   const found = topics.filter((t: string) => text.includes(String(t).toLowerCase()));
   const mapped: string[] = [];
-  if (/agent|智能体|computer use|tool use|mcp|browser/i.test(text)) mapped.push('AI Agent');
-  if (/coding|developer|software|repo|copilot|cursor|windsurf|编程/i.test(text)) mapped.push('AI Coding');
-  if (/reasoning|test-time|inference|推理/i.test(text)) mapped.push('Reasoning Models');
-  if (/multimodal|image|video|voice|语音|多模态/i.test(text)) mapped.push('Multimodal');
-  if (/search|browser|搜索|浏览器/i.test(text)) mapped.push('AI Search');
-  if (/infra|gpu|serving|database|vector|rag|基础设施/i.test(text)) mapped.push('AI Infra');
-  if (/startup|funding|investment|vc|创业|投资/i.test(text)) mapped.push('Investment');
+  if (/agent|智能体|computer use|tool use|mcp|browser|managed agent/i.test(text)) mapped.push('AI Agent');
+  if (/coding|developer|software|repo|copilot|cursor|windsurf|claude\.md|编程/i.test(text)) mapped.push('AI Coding');
+  if (/reasoning|test-time|inference|推理|think/i.test(text)) mapped.push('Reasoning Models');
+  if (/context engineering|context|memory|上下文|记忆/i.test(text)) mapped.push('Context Engineering');
+  if (/startup|founder|funding|investment|vc|创业|投资/i.test(text)) mapped.push('Investment');
   if (/safety|alignment|policy|安全|对齐/i.test(text)) mapped.push('Safety');
   return unique([...mapped, ...found]).slice(0, 8);
 }
@@ -65,71 +71,97 @@ function hasSignal(source: any, title: string, description: string, url = ''): b
   return containsAny(text, signalWords) ||
     containsAny(text, topics) ||
     containsAny(text, source.tags || []) ||
-    /ai|agent|model|coding|inference|llm|multimodal|search|browser|benchmark|eval|智能体|模型|编程|推理|多模态/i.test(text);
+    /ai|agent|model|coding|inference|llm|claude|context|software|startup|founder|智能体|模型|编程|推理|上下文/i.test(text);
 }
 
-function fallbackTitleFromUrl(url: string): string {
+function fallbackTitleFromUrl(url: string, author = ''): string {
   try {
-    const path = new URL(url).pathname.split('/').filter(Boolean).pop() || '';
-    return cleanText(decodeURIComponent(path.replace(/[-_]+/g, ' ')));
+    const id = new URL(url).pathname.split('/').filter(Boolean).pop() || '';
+    return cleanText(`X Article ${id}${author ? ` by ${author}` : ''}`);
   } catch {
-    return '';
+    return cleanText(`X Article${author ? ` by ${author}` : ''}`);
   }
 }
 
-function baseCandidate(
+async function xArticleCandidate(
   source: any,
-  entry: any,
-  platform: SourcePlatform,
-  status: Candidate['fetch_status'],
-  error = '',
-  isLive = false
-): Candidate | undefined {
-  const title = cleanText(entry.title || '');
-  const description = cleanText(entry.description || entry.excerpt || '');
-  const link = normalizeUrl(entry.link || entry.url || '');
-  if (!title || !link) return;
-  const blocked = containsAny(`${title} ${description}`, blockWords);
-  const ctype = entry.content_type || contentTypeFor(source);
-  if (!ctype || blocked || !isLikelyArticleUrl(link)) return;
-  if (isLive && !hasSignal(source, title, description, link)) return;
+  url: string,
+  sourceUrl: string,
+  method: DiscoveryMethod,
+  seed: any = {},
+  sourceFetchOk = true,
+  sourceError = ''
+): Promise<Candidate | undefined> {
+  const articleUrl = normalizeXArticleUrl(url || seed.url || seed.source_url || '');
+  if (!articleUrl) return;
+
+  let title = cleanText(seed.title || '');
+  let description = cleanText(seed.description || seed.summary || seed.excerpt || '');
+  let status: Candidate['fetch_status'] = sourceFetchOk ? 'partial' : 'failed';
+  let error = sourceError;
+
+  const metaRes = await fetchText(articleUrl, 3500);
+  stats.x_article_metadata_fetches += 1;
+  if (metaRes.ok) {
+    const meta = extractHtmlMeta(metaRes.text, articleUrl);
+    title = cleanText(meta.title || title);
+    description = cleanText(meta.description || description);
+    status = title || description ? 'partial' : 'failed';
+  } else if (!error) {
+    error = metaRes.error || `HTTP ${metaRes.status}`;
+  }
+
+  const authorHandle = cleanText(seed.author_handle || source.handle || String(seed.author || '').replace(/^@/, ''));
+  const author = cleanText(seed.author || source.display_name || source.name || (authorHandle ? `@${authorHandle}` : 'X Article author'));
+  title = title || fallbackTitleFromUrl(articleUrl, authorHandle ? `@${authorHandle}` : author);
+  description = description || `Public X Article discovered from ${source.display_name || source.name || source.handle || 'X'} on ${issueDate}.`;
+
+  if (containsAny(`${title} ${description}`, blockWords)) return;
+  if (!hasSignal(source, title, description, articleUrl)) return;
 
   const topicsFound = inferTopics(title, description);
-  const sourceDomain = getDomain(link) || getDomain(source.homepage_url || source.blog_url || '');
-  const evidence = unique([...extractLinks(description), source.blog_url, source.homepage_url].filter(Boolean)).slice(0, 8);
+  const evidence = unique([sourceUrl, source.x_url, seed.x_post_url, seed.tweet_url, ...(seed.evidence_links || [])].filter(Boolean)).slice(0, 8);
   const item: Candidate = {
-    id: sha1(`${link}|${title}`),
-    canonical_url: link,
-    source_url: entry.source_url || source.rss_url || source.blog_url || link,
-    source_platform: platform,
-    source_type: source.category || platform,
-    source_domain: sourceDomain,
-    content_type: ctype,
+    id: sha1(`${articleUrl}|${title}`),
+    canonical_url: articleUrl,
+    source_url: sourceUrl || articleUrl,
+    source_platform: 'x',
+    source_type: 'x_article',
+    source_domain: 'x.com',
+    content_type: 'x_article',
     title,
-    author: cleanText(entry.author || source.name || ''),
-    organization: source.name || '',
-    language: /[\u4e00-\u9fa5]/.test(title + description) ? 'zh' : 'en',
-    published_at: cleanText(entry.published_at || entry.lastmod || ''),
+    author,
+    author_handle: authorHandle,
+    author_role: cleanText(source.role || seed.author_role || ''),
+    organization: cleanText(source.organization || seed.organization || ''),
+    language: source.language || seed.language || (/[一-龥]/.test(title + description) ? 'zh' : 'en'),
+    published_at: cleanText(seed.published_at || seed.date || ''),
     captured_at: capturedAt,
     discovery_run_date: issueDate,
-    discovery_method: entry.discovery_method || platform as DiscoveryMethod,
-    live_fetch: Boolean(isLive),
-    first_seen_key: sha1(`${issueDate}|${link}`),
-    lastmod: entry.lastmod || '',
-    summary: description.slice(0, 260) || `Public article metadata collected from ${source.name}.`,
-    excerpt: description.slice(0, 420),
+    discovery_method: method,
+    live_fetch: true,
+    first_seen_key: sha1(`${issueDate}|${articleUrl}`),
+    lastmod: cleanText(seed.lastmod || ''),
+    summary: description.slice(0, 260),
+    excerpt: description.slice(0, 520),
     raw_text_available: false,
     topics: topicsFound,
-    tags: unique([...(source.tags || []), ...topicsFound]).slice(0, 12),
-    entities: unique([source.name, ...(topicsFound || [])]).slice(0, 12),
-    mentioned_companies: source.name ? [source.name] : [],
-    mentioned_people: [],
+    tags: unique([...(source.tags || []), ...(seed.tags || []), ...topicsFound]).slice(0, 12),
+    entities: unique([author, source.organization, ...(topicsFound || [])].filter(Boolean)).slice(0, 12),
+    mentioned_companies: source.organization ? [source.organization] : [],
+    mentioned_people: author ? [author] : [],
     mentioned_products: [],
-    mentioned_papers: evidence.filter(u => /arxiv|openreview|paper/i.test(u)),
-    mentioned_repos: evidence.filter(u => /github\.com/i.test(u)),
+    mentioned_papers: [],
+    mentioned_repos: evidence.filter((u: string) => /github\.com/i.test(u)),
     evidence_links: evidence,
-    engagement: {},
-    source_score: Number(source.priority || 60),
+    engagement: {
+      bookmarks: Number(seed.bookmarks || 0) || undefined,
+      likes: Number(seed.likes || 0) || undefined,
+      retweets: Number(seed.retweets || 0) || undefined,
+      impressions: Number(seed.impressions || 0) || undefined,
+      score: Number(seed.heat_score || seed.bookmarks || seed.likes || 0) || undefined
+    },
+    source_score: Number(source.priority || seed.priority || 76),
     information_density_score: 0,
     originality_score: 0,
     trend_score: 0,
@@ -142,139 +174,94 @@ function baseCandidate(
     title_hash: titleHash(title),
     status: 'candidate',
     fetch_status: status,
+    ...(status === 'failed' && error ? { fetch_error: error } : {}),
     first_seen_issue: issueDate,
-    last_seen_issue: issueDate,
-    ...(error ? { fetch_error: error } : {})
+    last_seen_issue: issueDate
   };
   item.cluster_id = assignCluster(item, issueDate);
   item.dedupe_key = makeDedupeKey(item);
   return item;
 }
 
-function candidateSitemaps(source: any): string[] {
-  const seeds = [source.sitemap_url, source.rss_url, source.blog_url, source.homepage_url].filter(Boolean);
-  const out: string[] = [];
-  for (const seed of seeds) {
-    try {
-      const u = new URL(seed);
-      if (/sitemap.*\.xml$/i.test(u.pathname)) out.push(u.toString());
-      out.push(`${u.origin}/sitemap.xml`, `${u.origin}/sitemap_index.xml`);
-    } catch {}
+function xSeedUrls(account: any): string[] {
+  const handle = account.handle || '';
+  const xUrl = account.x_url || (handle ? `https://x.com/${handle}` : '');
+  const urls: string[] = [];
+  if (xUrl) urls.push(xUrl);
+  if (handle) {
+    urls.push(`https://x.com/${handle}/articles`);
+    urls.push(`https://x.com/search?q=from%3A${encodeURIComponent(handle)}%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live`);
+    urls.push(`https://x.com/search?q=from%3A${encodeURIComponent(handle)}%20filter%3Alinks%20article&src=typed_query&f=live`);
   }
-  return unique(out).slice(0, 4);
+  return unique(urls);
 }
 
-async function candidateFromUrl(source: any, url: string, method: 'sitemap' | 'html_index', sourceUrl: string, lastmod = ''): Promise<Candidate | undefined> {
-  const res = await fetchText(url, 3500);
-  stats.article_metadata_fetches += 1;
-  const meta = res.ok ? extractHtmlMeta(res.text, url) : { title: fallbackTitleFromUrl(url), description: '', canonical_url: url };
-  const title = meta.title || fallbackTitleFromUrl(url);
-  if (!title) return;
-  return baseCandidate(source, {
-    title,
-    link: meta.canonical_url || url,
-    description: meta.description,
-    published_at: lastmod,
-    lastmod,
-    source_url: sourceUrl,
-    discovery_method: method
-  }, method === 'sitemap' ? 'sitemap' : 'html_index', res.ok ? 'partial' : 'failed', res.ok ? '' : res.error || '', true);
-}
-
-async function scanFeed(source: any, candidates: Candidate[], errors: any[]) {
-  if (!source.rss_url) return;
-  stats.rss_sources_attempted += 1;
-  const res = await fetchText(source.rss_url, 6000);
-  if (!res.ok) {
-    errors.push({ source: source.name, phase: 'rss', url: source.rss_url, error: res.error || `HTTP ${res.status}` });
-    return;
-  }
-  stats.rss_sources_scanned += 1;
-  const entries = parseFeed(res.text).slice(0, 12);
-  for (const entry of entries) {
-    const platform: SourcePlatform = entry.discovery_method === 'json_feed' ? 'json_feed' : 'rss';
-    const c = baseCandidate(source, { ...entry, source_url: source.rss_url }, platform, 'partial', '', true);
-    if (c) candidates.push(c);
-  }
-}
-
-async function scanSitemaps(source: any, candidates: Candidate[], errors: any[]) {
-  for (const sitemapUrl of candidateSitemaps(source)) {
-    stats.sitemap_sources_attempted += 1;
-    const res = await fetchText(sitemapUrl, 6000);
+async function scanXAccount(account: any, candidates: Candidate[], errors: any[]) {
+  for (const seedUrl of xSeedUrls(account)) {
+    stats.x_sources_attempted += 1;
+    stats.x_profile_pages_attempted += 1;
+    const res = await fetchText(seedUrl, 7000);
     if (!res.ok) {
-      errors.push({ source: source.name, phase: 'sitemap', url: sitemapUrl, error: res.error || `HTTP ${res.status}` });
+      errors.push({ source: account.handle || account.display_name, phase: 'x_public_scan', url: seedUrl, error: res.error || `HTTP ${res.status}` });
       continue;
     }
-    stats.sitemap_sources_scanned += 1;
-    let urls = parseSitemapUrls(res.text);
-    const nested = urls.filter(item => /sitemap.*\.xml/i.test(item.url)).slice(0, 3);
-    for (const child of nested) {
-      const childRes = await fetchText(child.url, 5000);
-      if (childRes.ok) urls = urls.concat(parseSitemapUrls(childRes.text));
-    }
-    const articleUrls = unique(urls
-      .filter(item => isLikelyArticleUrl(item.url))
-      .sort((a, b) => String(b.lastmod || '').localeCompare(String(a.lastmod || '')))
-      .map(item => item.url)).slice(0, 10);
-    for (const url of articleUrls) {
-      const lastmod = urls.find(item => item.url === url)?.lastmod || '';
-      const c = await candidateFromUrl(source, url, 'sitemap', sitemapUrl, lastmod);
+    stats.x_sources_scanned += 1;
+    stats.x_profile_pages_scanned += 1;
+    const urls = extractXArticleUrls(res.text, seedUrl).slice(0, 12);
+    stats.x_article_urls_found += urls.length;
+    for (const articleUrl of urls) {
+      const c = await xArticleCandidate(account, articleUrl, seedUrl, seedUrl.includes('/search?') ? 'x_search' : seedUrl.endsWith('/articles') ? 'x_articles_tab' : 'x_profile', {}, true, '');
       if (c) candidates.push(c);
     }
   }
 }
 
-async function scanHtmlIndex(source: any, candidates: Candidate[], errors: any[]) {
-  const indexUrl = source.blog_url || source.homepage_url;
-  if (!indexUrl) return;
-  stats.html_index_sources_attempted += 1;
-  const res = await fetchText(indexUrl, 6000);
-  if (!res.ok) {
-    errors.push({ source: source.name, phase: 'html_index', url: indexUrl, error: res.error || `HTTP ${res.status}` });
-    return;
-  }
-  stats.html_index_sources_scanned += 1;
-  const links = extractHrefLinks(res.text, indexUrl).filter(isLikelyArticleUrl).slice(0, 12);
-  for (const url of links) {
-    const c = await candidateFromUrl(source, url, 'html_index', indexUrl);
-    if (c) candidates.push(c);
-  }
+async function scanCuratedXArticle(seed: any, candidates: Candidate[], errors: any[]) {
+  const url = seed.url || seed.source_url || seed.link;
+  if (!url || !isXArticleUrl(url)) return;
+  stats.x_sources_attempted += 1;
+  stats.curated_x_candidates += 1;
+  const source = {
+    handle: seed.author_handle || String(seed.author || '').replace(/^@/, ''),
+    display_name: seed.author || seed.source || 'Curated X Article',
+    name: seed.source || seed.author || 'Curated X Article',
+    organization: seed.organization || '',
+    role: seed.author_role || '',
+    x_url: seed.author_handle ? `https://x.com/${String(seed.author_handle).replace(/^@/, '')}` : '',
+    priority: seed.priority || 82,
+    tags: seed.tags || [],
+    language: seed.language || 'en'
+  };
+  const c = await xArticleCandidate(source, url, seed.source_url || url, 'curated_x', seed, true, '');
+  if (c) candidates.push(c);
+  else errors.push({ source: seed.author || seed.source || 'curated_x', phase: 'curated_x_verify', url, error: 'not a valid X Article candidate or weak signal' });
 }
 
 async function run() {
   await ensureDir('data/candidates');
   await ensureDir('data/raw');
-  const sources = (await Promise.all(sourceFiles.map(loadYamlList))).flat();
-  const manual = await loadYamlList('data/sources/manual_links.yaml');
+  const xAccounts = await loadYamlList('data/sources/x_accounts.yaml');
   const curatedX = await loadYamlList('data/sources/curated_x_articles.yaml');
-  const curatedExternal = await loadYamlList('data/sources/curated_external_articles.yaml');
   const candidates: Candidate[] = [];
   const errors: any[] = [];
 
-  if (!liveFetch || allowCuratedInputs) {
-    for (const item of [...manual, ...curatedExternal]) {
-      const c = baseCandidate({ name: item.source || 'manual', category: 'manual_external', priority: 72, tags: item.tags || [] }, { ...item, link: item.url, discovery_method: 'manual' }, 'manual', 'skipped', '', false);
-      if (c) candidates.push(c);
+  if (liveFetch) {
+    const concurrency = 5;
+    let index = 0;
+    async function worker() {
+      while (index < xAccounts.length) {
+        const account = xAccounts[index++];
+        await scanXAccount(account, candidates, errors);
+      }
     }
-    for (const item of curatedX) {
-      const c = baseCandidate({ name: item.author || 'curated X Article', category: 'x_article', priority: 76, tags: item.tags || [] }, { ...item, link: item.url, discovery_method: 'curated_x' }, 'x', 'skipped', '', false);
-      if (c) candidates.push({ ...c, content_type: 'x_article', source_type: 'x_article' });
-    }
-  }
-
-  const autoSources = liveFetch ? sources.filter(s => s && s.use_as !== 'evidence_only') : [];
-  const concurrency = 6;
-  let index = 0;
-  async function worker() {
-    while (index < autoSources.length) {
-      const source = autoSources[index++];
-      await scanFeed(source, candidates, errors);
-      await scanSitemaps(source, candidates, errors);
-      await scanHtmlIndex(source, candidates, errors);
+    await Promise.all(Array.from({ length: concurrency }, worker));
+    for (const seed of curatedX) await scanCuratedXArticle(seed, candidates, errors);
+  } else {
+    for (const seed of curatedX) {
+      const c = await xArticleCandidate({ display_name: seed.author || 'Curated X Article', handle: seed.author_handle || '', priority: seed.priority || 76, tags: seed.tags || [] }, seed.url || seed.source_url || '', seed.source_url || seed.url || '', 'curated_x', seed, false, 'local non-live run');
+      if (c) candidates.push({ ...c, live_fetch: false, fetch_status: 'skipped' });
     }
   }
-  await Promise.all(Array.from({ length: concurrency }, worker));
 
   const uniqueByKey = new Map<string, Candidate>();
   for (const c of candidates) if (!uniqueByKey.has(c.dedupe_key)) uniqueByKey.set(c.dedupe_key, c);
@@ -283,18 +270,19 @@ async function run() {
   await writeJson(`data/raw/${issueDate}-run.json`, {
     issue_date: issueDate,
     captured_at: capturedAt,
-    sources_scanned: sources.length,
-    live_sources_scanned: autoSources.length,
+    sources_scanned: xAccounts.length,
+    live_sources_scanned: liveFetch ? stats.x_sources_scanned : 0,
     candidates_count: finalCandidates.length,
     fetch_failures: errors.length,
-    errors: errors.slice(0, 120),
+    errors: errors.slice(0, 160),
     live_fetch: liveFetch,
     ...stats,
-    discovery_sources_attempted: stats.rss_sources_attempted + stats.sitemap_sources_attempted + stats.html_index_sources_attempted,
-    discovery_sources_scanned: stats.rss_sources_scanned + stats.sitemap_sources_scanned + stats.html_index_sources_scanned,
-    compliance: 'No paid API, no X paid API, no login-wall bypass, no CAPTCHA bypass, no Cloudflare bypass, no paywall circumvention, no full copyrighted article body storage.'
+    discovery_sources_attempted: stats.x_sources_attempted,
+    discovery_sources_scanned: stats.x_sources_scanned + stats.curated_x_candidates,
+    selected_policy: 'x_article_only',
+    compliance: 'X Articles only. No paid API, no X paid API, no login-wall bypass, no CAPTCHA bypass, no Cloudflare bypass, no paywall circumvention, no full copyrighted article body storage.'
   });
-  console.log(`Collected ${finalCandidates.length} candidates from ${sources.length} sources for ${issueDate}. Live fetch: ${liveFetch}. Fetch failures: ${errors.length}.`);
+  console.log(`Collected ${finalCandidates.length} X Article candidates from ${xAccounts.length} X accounts and ${curatedX.length} curated seeds for ${issueDate}. Live fetch: ${liveFetch}. Fetch failures: ${errors.length}.`);
 }
 
 run().then(() => process.exit(0)).catch(error => { console.error(error); process.exit(1); });
