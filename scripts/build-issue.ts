@@ -1,15 +1,15 @@
 import { promises as fs } from 'node:fs';
 import { buildClusters } from './cluster.js';
-import { listFiles, loadYamlList, readJson, writeJson } from './utils/fs.js';
+import { loadYamlList, readJson, writeJson } from './utils/fs.js';
 import { beijingDate, beijingISOString } from './utils/time.js';
 import { generateSiteData } from './generate-site-data.js';
 import type { Candidate } from './utils/types.js';
 
 const issueDate = process.env.ISSUE_DATE || beijingDate();
-const allowed = new Set(['x_article','external_article','company_blog_article','media_article','vc_article','research_blog_article']);
+const allowed = new Set(['x_article']);
 
 async function sourceStats() {
-  const sourceFiles = ['company_sources.yaml','external_sources.yaml','media.yaml','vc_sources.yaml','research_sources.yaml','x_accounts.yaml'];
+  const sourceFiles = ['x_accounts.yaml'];
   const lists = await Promise.all(sourceFiles.map(f => loadYamlList(`data/sources/${f}`)));
   return { total: lists.flat().length, files: sourceFiles };
 }
@@ -24,10 +24,12 @@ function classify(items: Candidate[]) {
 }
 
 function isLiveRunCandidate(c: Candidate) {
-  return c.live_fetch === true &&
+  return c.content_type === 'x_article' &&
+    c.live_fetch === true &&
     c.discovery_run_date === issueDate &&
     c.fetch_status !== 'skipped' &&
-    c.source_platform !== 'manual';
+    c.source_platform === 'x' &&
+    /^https:\/\/(x\.com|twitter\.com)\//i.test(c.canonical_url || '');
 }
 
 async function run() {
@@ -37,13 +39,19 @@ async function run() {
   const historical = used.filter(u => u.issue_date !== issueDate);
   const usedKeys = new Set(historical.flatMap(u => [u.canonical_url, u.dedupe_key, u.title_hash, u.cluster_id].filter(Boolean)));
   const blockedDuplicates: Candidate[] = [];
+  const blockedNonX: Candidate[] = [];
   const blockedNonLive: Candidate[] = [];
   const seen = new Set<string>();
   const seenCluster = new Set<string>();
   const liveRun = rawRun.live_fetch === true;
 
   const eligible = candidates
-    .filter(c => allowed.has(c.content_type) && c.status !== 'rejected')
+    .filter(c => {
+      const ok = allowed.has(c.content_type) && /^https:\/\/(x\.com|twitter\.com)\//i.test(c.canonical_url || '');
+      if (!ok) blockedNonX.push(c);
+      return ok;
+    })
+    .filter(c => c.status !== 'rejected')
     .filter(c => {
       if (!liveRun || !isLiveRunCandidate(c)) {
         blockedNonLive.push(c);
@@ -62,17 +70,15 @@ async function run() {
   const selectedCount = selected.length;
   const isInitialSourceIndex = selectedCount === 0;
   const srcStats = await sourceStats();
-  const sourceIndex = isInitialSourceIndex ? (await Promise.all(['company_sources.yaml','external_sources.yaml','media.yaml','vc_sources.yaml','research_sources.yaml'].map(f => loadYamlList(`data/sources/${f}`)))).flat().map(s => ({
-    name: s.name,
+  const sourceIndex = isInitialSourceIndex ? (await loadYamlList('data/sources/x_accounts.yaml')).map(s => ({
+    name: s.display_name || s.name || s.handle,
+    handle: s.handle,
     category: s.category,
     homepage_url: s.homepage_url,
-    blog_url: s.blog_url,
-    rss_url: s.rss_url,
-    sitemap_url: s.sitemap_url,
     x_url: s.x_url,
     priority: s.priority,
-    use_as: s.use_as,
-    tags: s.tags || []
+    tags: s.tags || [],
+    use_as: 'x_article_discovery_only'
   })).slice(0, 80) : [];
 
   const issue = {
@@ -85,22 +91,24 @@ async function run() {
       candidates_count: candidates.length,
       selected_count: selectedCount,
       duplicates_blocked: blockedDuplicates.length,
+      non_x_blocked: blockedNonX.length,
       non_live_blocked: blockedNonLive.length,
       fetch_failures: rawRun.fetch_failures || 0,
       live_fetch: Boolean(rawRun.live_fetch),
       discovery_sources_attempted: rawRun.discovery_sources_attempted || 0,
       discovery_sources_scanned: rawRun.discovery_sources_scanned || 0,
-      is_initial_source_index: isInitialSourceIndex
+      is_initial_source_index: isInitialSourceIndex,
+      selected_policy: 'x_article_only'
     },
     summary: {
       one_liner: isInitialSourceIndex
-        ? '本期为初始来源索引或无合格新增 Articles：它验证来源库、合规边界与站点结构，不使用历史内容冒充新一期。'
-        : `本期从 ${candidates.length} 条当日 live fetch 候选中筛出 ${selectedCount} 条未展示过的公开 Articles，默认按质量而非热度排序。`,
+        ? '本期没有合格新增 X Articles：系统不使用外部官网长文、普通短帖、thread 或历史内容冒充新一期。'
+        : `本期从 ${candidates.length} 条当日候选中筛出 ${selectedCount} 条未展示过的公开 X Articles，默认按质量而非热度排序。`,
       main_trends: isInitialSourceIndex
-        ? ['来源库已覆盖 AI 公司、应用、Infra、VC、媒体、研究机构与社区发现入口。', '没有当日 live fetch 新候选时，不回填历史展示内容。']
+        ? ['主内容只允许 X Articles。', '外部官网文章、媒体文章、博客文章、论文、GitHub、播客和普通 X 短帖只能作为 evidence/background，不能进入 selected。']
         : Array.from(new Set(selected.flatMap(i => i.topics))).slice(0, 6),
       what_to_watch: isInitialSourceIndex
-        ? ['下一期自动运行将继续从 RSS/Atom、JSON Feed、公开 sitemap、公开博客索引中寻找新增 Articles。', 'X 仅作为发现入口；无法合规访问的内容会记录 fetch_status，而不会强抓正文。']
+        ? ['下一期将继续检查公开 X Article 链接；无法合规验证为 X Article 的内容不会进入主卡片。']
         : Array.from(new Set(selected.flatMap(i => i.what_to_watch_next ? [i.what_to_watch_next] : []))).slice(0, 5)
     },
     must_read: selected.filter(i => i.total_score >= 85).slice(0, 8),
@@ -110,7 +118,7 @@ async function run() {
     clusters: buildClusters(selected),
     sources: rawRun.errors ? rawRun.errors.map((e: any) => e.source).slice(0, 40) : [],
     source_index: sourceIndex,
-    compliance_note: 'No paid API, no X paid API, no login-wall bypass, no CAPTCHA bypass, no Cloudflare bypass, no rate-limit evasion, no full copyrighted article body storage.'
+    compliance_note: 'Selected primary content is X Articles only. No paid API, no X paid API, no login-wall bypass, no CAPTCHA bypass, no Cloudflare bypass, no rate-limit evasion, no full copyrighted article body storage.'
   };
 
   await writeJson(`data/issues/${issueDate}.json`, issue);
@@ -129,12 +137,13 @@ async function run() {
       cluster_id: item.cluster_id,
       discovery_run_date: item.discovery_run_date,
       source_platform: item.source_platform,
+      content_type: item.content_type,
       used_as: item.total_score >= 85 ? 'must_read' : item.total_score >= 70 ? 'worth_reading' : 'signal_watch'
     }))
   ];
   await writeJson('data/archive/used_items.json', newUsed);
   await generateSiteData(issue);
-  console.log(`Built issue ${issueDate}: ${selectedCount} selected, ${blockedDuplicates.length} duplicate candidates blocked, ${blockedNonLive.length} non-live candidates blocked.`);
+  console.log(`Built X-only issue ${issueDate}: ${selectedCount} selected, ${blockedDuplicates.length} duplicate candidates blocked, ${blockedNonX.length} non-X candidates blocked, ${blockedNonLive.length} non-live candidates blocked.`);
 }
 
 run().catch(error => { console.error(error); process.exit(1); });
