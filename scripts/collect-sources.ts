@@ -68,6 +68,7 @@ function articleConfidence(result: ArticleDiscoveryResult, title: string, descri
   if (result.backend === 'browser_render') score += 6;
   if (result.backend === 'curated_live') score += 5;
   if (result.backend === 'fxtwitter') score += 4;
+  if (result.backend === 'nitter_public') score += 3;
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
@@ -196,6 +197,7 @@ async function run() {
   console.log(`[diagnosis] issue_date=${issueDate} attempt=${attemptIndex}/${totalAttempts} final_compensation=${finalCompensation}`);
   console.log(`[diagnosis] sources x_accounts=${xAccounts.length} curated_x_articles=${curatedX.length} search_queries=${searchQueries.length}`);
   console.log(`[diagnosis] live_fetch=${liveFetch} backends=${backendConfig.backends.join(',')}`);
+  console.log('[diagnosis] expected backends may include static_http,browser_render,discovery_search,nitter_public,curated_live,fxtwitter');
 
   if (liveFetch) {
     backendOutput = await runBackends({
@@ -271,7 +273,7 @@ async function run() {
   });
 
   if (!finalCandidates.length) {
-    console.log('[diagnosis] no candidate produced. Likely causes: X dynamic pages inaccessible to static HTTP, browser backend unavailable/blocked, curated_x_articles.yaml empty, or discovered URLs failed strict X Article validation. Historical fallback remains disabled.');
+    console.log('[diagnosis] no candidate produced. Likely causes: X dynamic pages inaccessible to static HTTP, browser backend unavailable/blocked, Nitter not configured, curated_x_articles.yaml empty, or discovered URLs failed strict X Article validation. Historical fallback remains disabled.');
   }
   console.log(`Collected ${finalCandidates.length} X Article candidates from ${xAccounts.length} X accounts, ${curatedX.length} curated seeds and ${searchQueries.length} search queries for ${issueDate}. Live fetch: ${liveFetch}. Fetch failures: ${fetchFailures}.`);
 }
