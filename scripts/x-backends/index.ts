@@ -1,5 +1,5 @@
 import { readJson } from '../utils/fs.js';
-import { FetchBackendName, BackendStat, DiscoveryInput, XArticleBackend, ArticleDiscoveryResult } from './types.js';
+import type { FetchBackendName, BackendStat, DiscoveryInput, XArticleBackend, ArticleDiscoveryResult } from './types.js';
 import { StaticHttpBackend } from './static-http.js';
 import { BrowserRenderBackend } from './browser-render.js';
 import { DiscoverySearchBackend } from './discovery-search.js';
