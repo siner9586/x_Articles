@@ -1,0 +1,31 @@
+name: One-shot Trigger Daily X Articles
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/trigger-daily-once.yml
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Forward force=true to daily.yml"
+        required: false
+        default: "false"
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger daily.yml once
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE: ${{ github.event.inputs.force || 'false' }}
+        run: |
+          echo "Triggering daily.yml on main with force=${FORCE}"
+          gh workflow run daily.yml -R "${{ github.repository }}" --ref main -f force="${FORCE}"
+          echo "Triggered daily.yml. Check the Actions tab for workflow_dispatch run."
