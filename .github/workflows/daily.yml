@@ -156,7 +156,7 @@ jobs:
           X_ARTICLES_FETCH_LIVE: 'true'
           X_ARTICLES_BROWSER_FETCH: 'true'
           X_ARTICLES_BROWSER_HEADLESS: 'true'
-          X_ARTICLES_FETCH_BACKENDS: 'static_http,browser_render,discovery_search,curated_live,fxtwitter'
+          X_ARTICLES_FETCH_BACKENDS: 'static_http,browser_render,discovery_search,nitter_public,curated_live,fxtwitter'
           X_ARTICLES_MAX_ACCOUNTS: '80'
           X_ARTICLES_MAX_SEARCH_QUERIES: '30'
           X_ARTICLES_MAX_CANDIDATES: '200'
@@ -169,6 +169,7 @@ jobs:
           X_ARTICLES_PRODUCTION: 'true'
           X_ARTICLES_FORCE: ${{ github.event.inputs.force || 'false' }}
           X_COOKIES_JSON: ${{ secrets.X_COOKIES_JSON }}
+          NITTER_URL: ${{ secrets.NITTER_URL }}
         run: npm run daily
 
       - name: Commit and push if changed
