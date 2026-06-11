@@ -10,12 +10,33 @@ import {
 } from './x-article.js';
 
 function testXArticleRules() {
+  const allowed = [
+    'https://x.com/i/article/1234567890',
+    'https://x.com/i/articles/1234567890',
+    'https://x.com/alice/article/abc123',
+    'https://x.com/alice/articles/abc123',
+    'https://twitter.com/i/article/1234567890',
+    'https://twitter.com/i/articles/1234567890',
+    'https://twitter.com/alice/article/abc123',
+    'https://twitter.com/alice/articles/abc123',
+    'https://mobile.x.com/alice/articles/abc123'
+  ];
+  for (const url of allowed) assert.equal(isXArticleUrl(url), true, `allowed article URL rejected: ${url}`);
   const a = 'https://twitter.com/alice/articles/abc123?utm_source=newsletter&ref=foo';
   assert.equal(canonicalizeUrl(a), 'https://x.com/alice/articles/abc123');
   assert.equal(isXArticleUrl(a), true);
   assert.equal(extractXArticleId(a), 'alice/abc123');
-  assert.equal(isXArticleUrl('https://x.com/alice/status/123'), false);
-  assert.equal(isXArticleUrl('https://x.com/compose/articles'), false);
+
+  const blocked = [
+    'https://x.com/compose/articles',
+    'https://x.com/alice/status/123',
+    'https://x.com/alice',
+    'https://x.com/search?q=ai',
+    'https://x.com/i/bookmarks',
+    'https://x.com/i/lists/123',
+    'https://x.com/i/status/123'
+  ];
+  for (const url of blocked) assert.equal(isXArticleUrl(url), false, `blocked URL accepted: ${url}`);
   assert.equal(isForbiddenPrimaryUrl('https://youtube.com/watch?v=x'), true);
   assert.equal(isForbiddenPrimaryUrl('https://x.com/alice/status/123'), true);
 }
