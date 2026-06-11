@@ -29,17 +29,17 @@ function heatScore(c: Candidate) {
   return clamp(raw ? 38 + Math.log10(raw + 1) * 22 : 34);
 }
 
-function authorCredibilityScore(c: Candidate) {
+function sourceScore(c: Candidate) {
   const followers = metricNumber(c, ['author_followers']);
   const verified = Boolean((c.heat_metrics || {})['author_verified']);
-  return clamp(c.source_score * 0.72 + (followers ? Math.log10(followers + 1) * 7 : 0) + (verified ? 10 : 0));
+  return clamp((c.source_score || 76) * 0.78 + (followers ? Math.log10(followers + 1) * 5 : 0) + (verified ? 8 : 0));
 }
 
 function freshnessScore(c: Candidate) {
   const date = c.published_at || c.discovery_run_date || issueDate;
   if (!date) return 60;
   const parsed = Date.parse(date);
-  if (!Number.isFinite(parsed)) return c.discovery_run_date === issueDate ? 82 : 55;
+  if (!Number.isFinite(parsed)) return c.discovery_run_date === issueDate ? 88 : 55;
   const ageHours = Math.max(0, (Date.now() - parsed) / 36e5);
   if (ageHours <= 24) return 100;
   if (ageHours <= 72) return 82;
@@ -48,38 +48,56 @@ function freshnessScore(c: Candidate) {
   return 8;
 }
 
-function completenessScore(c: Candidate) {
-  const fields = [
-    c.title,
-    c.author,
-    c.canonical_url,
-    c.published_at || c.discovery_run_date,
-    c.summary || c.excerpt,
-    c.fetched_at,
-    c.fetch_batch_id || c.run_id,
-    c.content_hash || c.url_hash
-  ];
-  return clamp(fields.filter(Boolean).length * 12.5);
+function articleConfidenceScore(c: Candidate) {
+  let score = Number(c.article_confidence_score || 0);
+  if (!score) score = 45;
+  if (c.article_id) score += 12;
+  if (/^https:\/\/x\.com\//.test(c.canonical_url)) score += 10;
+  if (c.backend === 'browser_render') score += 8;
+  if (c.backend === 'curated_live') score += 7;
+  if ((c.summary || c.excerpt || '').length > 100) score += 8;
+  if (c.fetch_status === 'failed') score -= 20;
+  return clamp(score);
+}
+
+function qualityScore(c: Candidate) {
+  const text = `${c.title} ${c.summary || ''} ${c.excerpt || ''}`;
+  const evidenceCount = (c.evidence_links || []).length;
+  const hasSignal = containsAny(text, signalWords);
+  const hasTopic = containsAny(text, topicsList) || c.topics.length > 0;
+  const hasData = /benchmark|eval|data|chart|graph|architecture|case study|lessons|postmortem|framework|roadmap|cost|latency|inference|评测|数据|架构|案例|复盘|成本/i.test(text);
+  const density = clamp(45 + (c.excerpt?.length || 0) / 10 + evidenceCount * 5 + (hasData ? 18 : 0));
+  const originality = clamp(45 + (hasSignal ? 18 : 0) + (/we learned|lessons|why|how|memo|thesis|复盘|方法论|拆解/i.test(text) ? 14 : 0));
+  const siteFit = clamp(50 + (hasTopic ? 22 : 0) + (/ai|agent|model|llm|coding|inference|multimodal|search|browser|AI|智能体|模型|编程/i.test(text) ? 18 : 0));
+  c.information_density_score = density;
+  c.originality_score = originality;
+  c.trend_score = clamp(42 + c.topics.length * 10 + (hasTopic ? 16 : 0));
+  c.evidence_score = clamp(40 + evidenceCount * 10 + (/github|arxiv|benchmark|docs|paper|release|官方|文档/i.test(text + c.evidence_links.join(' ')) ? 16 : 0));
+  c.site_fit_score = siteFit;
+  return clamp(density * 0.40 + originality * 0.30 + siteFit * 0.30);
 }
 
 function lowQualityPenalty(text: string) {
   let penalty = 0;
-  if (/(giveaway|airdrop|promo code|discount|sponsored|webinar|register now|subscribe|newsletter|podcast|youtube)/i.test(text)) penalty += 28;
-  if (text.length < 160) penalty += 14;
+  if (/(giveaway|airdrop|promo code|discount|sponsored|webinar|register now|subscribe|newsletter|podcast|youtube|breaking\s+news)/i.test(text)) penalty += 28;
+  if (text.length < 120) penalty += 12;
   if (!/(how|why|lessons|guide|analysis|framework|architecture|method|launch|research|benchmark|复盘|方法|教程|经验|判断|观点|架构|研究)/i.test(text)) penalty += 8;
   return penalty;
 }
 
 function weighted(c: Candidate, text: string) {
+  const quality = qualityScore(c);
   const heat = heatScore(c);
-  const author = authorCredibilityScore(c);
-  const freshness = freshnessScore(c);
-  const completeness = completenessScore(c);
-  const quality = clamp(c.information_density_score * 0.45 + c.originality_score * 0.30 + c.site_fit_score * 0.25);
+  const fresh = freshnessScore(c);
+  const source = sourceScore(c);
+  const confidence = articleConfidenceScore(c);
   const duplicateRiskPenalty = !c.content_hash || !c.url_hash ? 12 : 0;
   const penalty = duplicateRiskPenalty + lowQualityPenalty(text);
+  c.quality_score = quality;
   c.heat_score = heat;
-  c.score = clamp(heat * 0.22 + quality * 0.30 + freshness * 0.16 + author * 0.14 + completeness * 0.18 - penalty);
+  c.freshness_score = fresh;
+  c.article_confidence_score = confidence;
+  c.score = clamp(quality * 0.30 + heat * 0.20 + fresh * 0.20 + source * 0.15 + confidence * 0.15 - penalty);
   return c.score;
 }
 
@@ -103,15 +121,6 @@ function score(c: Candidate): Candidate {
     return { ...c, status: 'rejected', reason_rejected: `Not a current-run live X Article: ${verdict.reason}` };
   }
   const text = `${c.title} ${c.summary || ''} ${c.excerpt || ''}`;
-  const evidenceCount = (c.evidence_links || []).length;
-  const hasSignal = containsAny(text, signalWords);
-  const hasTopic = containsAny(text, topicsList) || c.topics.length > 0;
-  const hasData = /benchmark|eval|data|chart|graph|architecture|case study|lessons|postmortem|framework|roadmap|cost|latency|inference|评测|数据|架构|案例|复盘|成本/i.test(text);
-  c.information_density_score = clamp(45 + (c.excerpt?.length || 0) / 10 + evidenceCount * 5 + (hasData ? 18 : 0));
-  c.originality_score = clamp(45 + (hasSignal ? 18 : 0) + (/we learned|lessons|why|how|memo|thesis|复盘|方法论|拆解/i.test(text) ? 14 : 0));
-  c.trend_score = clamp(42 + c.topics.length * 10 + (hasTopic ? 16 : 0));
-  c.evidence_score = clamp(40 + evidenceCount * 10 + (/github|arxiv|benchmark|docs|paper|release|官方|文档/i.test(text + c.evidence_links.join(' ')) ? 16 : 0));
-  c.site_fit_score = clamp(50 + (hasTopic ? 22 : 0) + (/ai|agent|model|llm|coding|inference|multimodal|search|browser|AI|智能体|模型|编程/i.test(text) ? 18 : 0));
   c.total_score = weighted(c, text);
   concreteText(c);
   if (c.total_score < 40) {
