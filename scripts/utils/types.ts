@@ -17,7 +17,8 @@ export type DiscoveryMethod =
   | 'static_http'
   | 'browser_render'
   | 'discovery_search'
-  | 'fxtwitter';
+  | 'fxtwitter'
+  | 'nitter_public';
 
 export type Candidate = {
   id: string;
