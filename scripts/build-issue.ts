@@ -9,9 +9,12 @@ import { attachArticleIdentity, isForbiddenPrimaryUrl, xArticleVerdict } from '.
 
 const issueDate = process.env.ISSUE_DATE || beijingDate();
 const allowed = new Set(['x_article']);
+const attemptIndex = Number(process.env.X_ARTICLES_ATTEMPT_INDEX || 1);
+const totalAttempts = Number(process.env.X_ARTICLES_TOTAL_ATTEMPTS || 30);
+const finalCompensation = process.env.X_ARTICLES_FINAL_COMPENSATION === 'true' || attemptIndex >= totalAttempts;
 
 async function sourceStats() {
-  const sourceFiles = ['x_accounts.yaml'];
+  const sourceFiles = ['x_accounts.yaml', 'curated_x_articles.yaml', 'x_article_search_queries.yaml'];
   const lists = await Promise.all(sourceFiles.map(f => loadYamlList(`data/sources/${f}`)));
   return { total: lists.flat().length, files: sourceFiles };
 }
@@ -57,6 +60,82 @@ function selectedShape(item: Candidate): Candidate {
     status: 'selected' as const,
     used_in_issue: issueDate
   };
+}
+
+async function writeEmptyIssue(rawRun: any, candidates: Candidate[], blocked: Record<string, number>, historicalCount: number) {
+  const srcStats = await sourceStats();
+  const now = beijingISOString();
+  const issue = {
+    metadata: {
+      issue_date: issueDate,
+      generated_at: now,
+      timezone: 'Asia/Shanghai',
+      sources_scanned: rawRun.sources_scanned || srcStats.total,
+      live_sources_scanned: rawRun.live_sources_scanned || 0,
+      candidates_count: candidates.length,
+      selected_count: 0,
+      duplicates_blocked: blocked.duplicates,
+      non_x_blocked: blocked.nonX,
+      non_live_blocked: blocked.nonLive,
+      forbidden_blocked: blocked.forbidden,
+      fetch_failures: rawRun.fetch_failures || 0,
+      live_fetch: Boolean(rawRun.live_fetch),
+      fetch_batch_id: rawRun.fetch_batch_id || '',
+      attempt_index: attemptIndex,
+      total_attempts: totalAttempts,
+      final_compensation: finalCompensation,
+      discovery_sources_attempted: rawRun.discovery_sources_attempted || 0,
+      discovery_sources_scanned: rawRun.discovery_sources_scanned || 0,
+      backends_enabled: rawRun.backends_enabled || [],
+      backend_stats: rawRun.backend_stats || {},
+      history_entries_used_for_dedupe_only: historicalCount,
+      empty_reason: 'no_qualified_new_x_articles',
+      history_fallback_used: false,
+      mock_used: false,
+      compliance_note: 'No historical content was reused.',
+      is_initial_source_index: false,
+      selected_policy: 'x_article_only'
+    },
+    summary: {
+      one_liner: '本期未发现合格新增 X Articles。系统已完成当日 live fetch、历史去重和合规校验；未使用历史展示内容补齐。',
+      main_trends: ['本期没有合格新增 X Articles。'],
+      what_to_watch: ['继续等待后续当日 live fetch 发现新的公开 X Article；历史内容仅用于去重，不用于补齐。']
+    },
+    must_read: [],
+    worth_reading: [],
+    signal_watch: [],
+    hot_rank: [],
+    clusters: [],
+    sources: rawRun.errors ? rawRun.errors.map((e: any) => e.source || e.backend).filter(Boolean).slice(0, 40) : [],
+    compliance_note: 'Selected primary content is X Articles only. No paid API, no X paid API, no login-wall bypass, no CAPTCHA bypass, no Cloudflare bypass, no rate-limit evasion, no full copyrighted article body storage. No historical content was reused.'
+  };
+
+  await writeJson(`data/issues/${issueDate}.json`, issue);
+  await fs.mkdir('content/issues', { recursive: true });
+  await fs.writeFile(
+    `content/issues/${issueDate}.md`,
+    `---\nissue_date: ${issueDate}\ntitle: X Articles Daily ${issueDate}\nempty_reason: no_qualified_new_x_articles\n---\n\n${issue.summary.one_liner}\n`,
+    'utf8'
+  );
+  await writeJson(`data/raw/${issueDate}-run.json`, {
+    ...rawRun,
+    generation_status: 'empty_issue_generated_final_compensation',
+    empty_issue_generated: true,
+    empty_reason: 'no_qualified_new_x_articles',
+    selected_count: 0,
+    history_fallback_used: false,
+    mock_used: false,
+    history_entries_used_for_dedupe_only: historicalCount,
+    duplicate_candidates_blocked: blocked.duplicates,
+    non_x_blocked: blocked.nonX,
+    non_live_blocked: blocked.nonLive,
+    forbidden_blocked: blocked.forbidden
+  });
+  const newIndex = await rebuildShownIndex('');
+  await writeUsedItemsCompat(newIndex);
+  await writeLatestSuccess(issue);
+  await generateSiteData(issue);
+  console.log(`Built empty X-only issue ${issueDate}: final compensation reached, no historical fallback used.`);
 }
 
 async function run() {
@@ -114,13 +193,23 @@ async function run() {
   const selected = [...must_read, ...worth_reading, ...signal_watch].map(selectedShape);
   const selectedCount = selected.length;
   const srcStats = await sourceStats();
+  const blocked = {
+    duplicates: blockedDuplicates.length,
+    nonX: blockedNonX.length,
+    nonLive: blockedNonLive.length,
+    forbidden: blockedForbidden.length
+  };
 
   if (selectedCount === 0) {
+    const status = finalCompensation ? 'empty_issue_generated_final_compensation' : 'deferred_until_later_compensation';
     await appendRunLog({
       phase: 'generate',
       publish_date: issueDate,
-      status: 'skipped_no_new_articles',
-      message: '当日 live fetch 无合格新 Article，未使用历史内容补齐',
+      status,
+      message: finalCompensation ? '最后补偿仍无合格新增 X Article，生成诚实空期' : '当日 live fetch 暂无合格新 Article，等待后续补偿，不生成空期',
+      attempt_index: attemptIndex,
+      total_attempts: totalAttempts,
+      final_compensation: finalCompensation,
       candidates_count: candidates.length,
       duplicate_candidates_blocked: blockedDuplicates.length,
       non_x_blocked: blockedNonX.length,
@@ -129,17 +218,25 @@ async function run() {
       live_fetch: Boolean(rawRun.live_fetch),
       history_entries_used_for_dedupe_only: historical.length
     });
-    await writeJson(`data/raw/${issueDate}-run.json`, {
-      ...rawRun,
-      generation_status: 'skipped_no_new_articles',
-      generation_message: '当日 live fetch 无合格新 Article，未使用历史内容补齐',
-      history_entries_used_for_dedupe_only: historical.length,
-      duplicate_candidates_blocked: blockedDuplicates.length,
-      non_x_blocked: blockedNonX.length,
-      non_live_blocked: blockedNonLive.length,
-      forbidden_blocked: blockedForbidden.length
-    });
-    console.log(`Skipped issue ${issueDate}: 当日 live fetch 无合格新 Article，未使用历史内容补齐.`);
+
+    if (!finalCompensation) {
+      await writeJson(`data/raw/${issueDate}-run.json`, {
+        ...rawRun,
+        generation_status: 'deferred_until_later_compensation',
+        generation_message: '当日 live fetch 暂无合格新 Article，未使用历史内容补齐；等待后续补偿继续 live fetch',
+        empty_issue_generated: false,
+        empty_reason: 'no_qualified_new_x_articles_yet',
+        history_entries_used_for_dedupe_only: historical.length,
+        duplicate_candidates_blocked: blockedDuplicates.length,
+        non_x_blocked: blockedNonX.length,
+        non_live_blocked: blockedNonLive.length,
+        forbidden_blocked: blockedForbidden.length
+      });
+      console.log(`Deferred issue ${issueDate}: no eligible new X Article on attempt ${attemptIndex}/${totalAttempts}; later compensation may retry live fetch.`);
+      return;
+    }
+
+    await writeEmptyIssue(rawRun, candidates, blocked, historical.length);
     return;
   }
 
@@ -159,9 +256,16 @@ async function run() {
       fetch_failures: rawRun.fetch_failures || 0,
       live_fetch: Boolean(rawRun.live_fetch),
       fetch_batch_id: rawRun.fetch_batch_id || '',
+      attempt_index: attemptIndex,
+      total_attempts: totalAttempts,
+      final_compensation: finalCompensation,
+      backends_enabled: rawRun.backends_enabled || [],
+      backend_stats: rawRun.backend_stats || {},
       discovery_sources_attempted: rawRun.discovery_sources_attempted || 0,
       discovery_sources_scanned: rawRun.discovery_sources_scanned || 0,
       history_entries_used_for_dedupe_only: historical.length,
+      history_fallback_used: false,
+      mock_used: false,
       is_initial_source_index: false,
       selected_policy: 'x_article_only'
     },
@@ -175,7 +279,7 @@ async function run() {
     signal_watch: selected.filter(i => i.total_score >= 55 && i.total_score < 70).slice(0, 20),
     hot_rank: [...selected].sort((a, b) => (b.heat_score || 0) - (a.heat_score || 0)),
     clusters: buildClusters(selected),
-    sources: rawRun.errors ? rawRun.errors.map((e: any) => e.source).slice(0, 40) : [],
+    sources: rawRun.errors ? rawRun.errors.map((e: any) => e.source || e.backend).filter(Boolean).slice(0, 40) : [],
     compliance_note: 'Selected primary content is X Articles only. No paid API, no X paid API, no login-wall bypass, no CAPTCHA bypass, no Cloudflare bypass, no rate-limit evasion, no full copyrighted article body storage.'
   };
 
@@ -197,6 +301,9 @@ async function run() {
     non_live_blocked: blockedNonLive.length,
     forbidden_blocked: blockedForbidden.length,
     live_fetch: Boolean(rawRun.live_fetch),
+    attempt_index: attemptIndex,
+    total_attempts: totalAttempts,
+    final_compensation: finalCompensation,
     history_entries_used_for_dedupe_only: historical.length
   });
   await generateSiteData(issue);
