@@ -8,9 +8,10 @@ import { attachArticleIdentity, isForbiddenPrimaryUrl, isXArticleUrl, xArticleVe
 const errors: string[] = [];
 const required = [
   'package.json','astro.config.mjs','tsconfig.json','README.md','.github/workflows/daily.yml',
-  'data/sources/x_accounts.yaml','data/sources/external_sources.yaml','data/sources/media.yaml','data/sources/vc_sources.yaml','data/sources/company_sources.yaml','data/sources/research_sources.yaml','data/sources/query_templates.yaml','data/sources/manual_links.yaml','data/sources/curated_x_articles.yaml','data/sources/curated_external_articles.yaml','data/sources/blocklist.yaml','data/sources/source_policy.md',
+  'data/sources/x_accounts.yaml','data/sources/external_sources.yaml','data/sources/media.yaml','data/sources/vc_sources.yaml','data/sources/company_sources.yaml','data/sources/research_sources.yaml','data/sources/query_templates.yaml','data/sources/x_article_search_queries.yaml','data/sources/manual_links.yaml','data/sources/curated_x_articles.yaml','data/sources/curated_external_articles.yaml','data/sources/blocklist.yaml','data/sources/source_policy.md',
   'data/archive/used_items.json','public/assets/wechat-qrcode.svg','public/index-data/latest.json','public/index-data/issues.json','public/index-data/search.json',
   'scripts/collect-sources.ts','scripts/fetch-public.ts','scripts/extract-links.ts','scripts/score-candidates.ts','scripts/dedupe.ts','scripts/cluster.ts','scripts/build-issue.ts','scripts/generate-site-data.ts','scripts/preflight.ts','scripts/daily.ts','scripts/x-article.ts','scripts/history-index.ts','scripts/qa.ts','scripts/test.ts',
+  'scripts/x-backends/types.ts','scripts/x-backends/utils.ts','scripts/x-backends/static-http.ts','scripts/x-backends/browser-render.ts','scripts/x-backends/discovery-search.ts','scripts/x-backends/curated-live.ts','scripts/x-backends/fxtwitter.ts','scripts/x-backends/index.ts',
   'src/pages/index.astro','src/pages/issues/index.astro','src/pages/issues/latest.astro','src/pages/issues/[date].astro','src/pages/sources.astro','src/pages/topics.astro','src/pages/about.astro','src/pages/search.astro','src/components/Header.astro','src/components/WechatPopover.astro','src/components/ArticleCard.astro','src/layouts/BaseLayout.astro','src/styles/global.css'
 ];
 const expectedCrons = [
@@ -28,9 +29,12 @@ function selectedPath(issueDate: string, index: number) { return `data/issues/${
 
 for (const file of required) if (!(await exists(file))) fail(`Missing required file: ${file}`);
 
-for (const file of ['data/sources/x_accounts.yaml','data/sources/external_sources.yaml','data/sources/media.yaml','data/sources/vc_sources.yaml','data/sources/company_sources.yaml','data/sources/research_sources.yaml','data/sources/query_templates.yaml','data/sources/blocklist.yaml']) {
+for (const file of ['data/sources/x_accounts.yaml','data/sources/external_sources.yaml','data/sources/media.yaml','data/sources/vc_sources.yaml','data/sources/company_sources.yaml','data/sources/research_sources.yaml','data/sources/query_templates.yaml','data/sources/x_article_search_queries.yaml','data/sources/blocklist.yaml']) {
   try { parse(await readText(file)); } catch (e: any) { fail(`Invalid YAML ${file}: ${e.message}`); }
 }
+
+const pkg = JSON.parse(await readText('package.json', '{}'));
+if (!pkg.devDependencies?.playwright) fail('package.json must include Playwright for browser_render backend');
 
 const workflow = await readText('.github/workflows/daily.yml');
 const cronMatches = [...workflow.matchAll(/cron:\s*['"]([^'"]+)['"]/g)].map(m => m[1]);
@@ -42,16 +46,30 @@ for (const phrase of [
   'concurrency:',
   'cancel-in-progress: false',
   'Resolve Beijing publish_date',
-  'Preflight: check current issue exists',
-  'Current issue for ${PUBLISH_DATE} already exists. Skip this compensation run.',
+  'attempt_index',
+  'final_compensation',
   'X_ARTICLES_FETCH_LIVE',
+  'X_ARTICLES_BROWSER_FETCH',
+  'X_ARTICLES_FETCH_BACKENDS',
+  'Install Playwright browsers',
   'npm run daily'
 ]) {
   if (!workflow.includes(phrase)) fail(`daily workflow missing phrase: ${phrase}`);
 }
 
+const collect = await readText('scripts/collect-sources.ts');
+for (const phrase of ['runBackends','browser_render','discovery_search','curated_live','fxtwitter','history_fallback_used: false','mock_used: false']) {
+  if (!collect.includes(phrase)) fail(`collect-sources missing phrase: ${phrase}`);
+}
+
+const buildIssue = await readText('scripts/build-issue.ts');
+for (const phrase of ['finalCompensation','deferred_until_later_compensation','empty_issue_generated_final_compensation','No historical content was reused.']) {
+  if (!buildIssue.includes(phrase)) fail(`build-issue missing final compensation phrase: ${phrase}`);
+}
+
 const latest = await readJson<any>('public/index-data/latest.json', null);
 if (!latest?.metadata?.issue_date) fail('latest.json missing metadata.issue_date');
+if ((latest?.metadata?.selected_count || 0) === 0 && !latest?.metadata?.empty_reason) fail('latest.json empty issue must have metadata.empty_reason');
 const issuesIndex = await readJson<any[]>('public/index-data/issues.json', []);
 const search = await readJson<any[]>('public/index-data/search.json', []);
 if (!Array.isArray(issuesIndex)) fail('issues index is not array');
@@ -64,6 +82,7 @@ for (const file of issueFiles) {
   const issueDate = issue?.metadata?.issue_date || file.replace(/^.*\/|\.json$/g, '');
   const selected = selectedItems(issue);
   if ((issue.metadata?.selected_count || 0) !== selected.length) fail(`${file} selected_count does not match selected arrays length`);
+  if ((issue.metadata?.selected_count || 0) === 0 && !issue.metadata?.empty_reason) fail(`${file} empty issue must have metadata.empty_reason`);
   if (issue?.source_index?.length) fail(`${file} contains source_index display data; production issues must contain current X Articles only`);
   selected.forEach((raw, index) => {
     const item = attachArticleIdentity(raw);
@@ -71,7 +90,7 @@ for (const file of issueFiles) {
     const verdict = xArticleVerdict(item);
     if (!verdict.ok) fail(`${label} is not a strict X Article: ${verdict.reason} ${item.canonical_url || ''}`);
     if (isForbiddenPrimaryUrl(item.canonical_url)) fail(`${label} has forbidden primary URL: ${item.canonical_url}`);
-    for (const field of ['title','author','canonical_url','article_url','source_type','fetched_at','fetch_batch_id','source_platform','content_type','content_hash','url_hash','reason_for_selection']) {
+    for (const field of ['title','author','canonical_url','article_url','source_type','fetched_at','fetch_batch_id','source_platform','content_type','content_hash','url_hash','reason_for_selection','backend']) {
       if (item[field] === undefined || item[field] === null || item[field] === '') fail(`${label} missing ${field}`);
     }
     if (item.source_type !== 'x_article' || item.content_type !== 'x_article' || item.source_platform !== 'x') fail(`${label} must be source_type/content_type x_article and source_platform x`);
@@ -109,11 +128,13 @@ for (const item of currentCandidates) {
 const currentRaw = await readJson<any>(`data/raw/${currentDate}-run.json`, null);
 if (currentRaw) {
   if (currentRaw.live_fetch !== true) fail('Current raw run must be live_fetch=true in production data');
-  if (/mock|fixture|sample|fallback historical|previous issue/i.test(JSON.stringify(currentRaw))) fail('Current raw run contains forbidden mock/fixture/sample/fallback marker');
+  if (currentRaw.history_fallback_used === true) fail('Current raw run used historical fallback');
+  if (currentRaw.mock_used === true) fail('Current raw run used mock data');
+  if (currentRaw.selected_count === 0 && currentRaw.empty_issue_generated === true && currentRaw.final_compensation !== true) fail('Empty issue can only be generated on final compensation');
 }
 
 const readme = await readText('README.md');
-for (const phrase of ['不使用付费 API','X paid API','合规边界','去重规则','公众号二维码','06:12','只收录 X Articles','shown-index.json','30 次']) {
+for (const phrase of ['不使用付费 API','X paid API','合规边界','去重规则','公众号二维码','06:12','只收录 X Articles','shown-index.json','30 次','多后端','Playwright','第 30 次']) {
   if (!readme.includes(phrase)) fail(`README missing phrase: ${phrase}`);
 }
 
@@ -129,6 +150,8 @@ if (!(popover + globalCss).includes('86vw') || !(popover + globalCss).includes('
 
 const sourcesCount = (await loadYamlList('data/sources/x_accounts.yaml')).length;
 if (sourcesCount < 20) fail(`X account source library too small: ${sourcesCount}`);
+const searchQueryCount = (await loadYamlList('data/sources/x_article_search_queries.yaml')).length;
+if (searchQueryCount < 10) fail(`X Article search query library too small: ${searchQueryCount}`);
 
 const srcFiles = await listFiles('src/pages', '.astro');
 const allSrc = (await Promise.all([...srcFiles, 'src/components/Header.astro','src/components/WechatPopover.astro','src/components/ArticleCard.astro','src/layouts/BaseLayout.astro','src/styles/global.css'].map(f => readText(f)))).join('\n');
@@ -137,8 +160,9 @@ for (const bad of ['lorem ipsum','undefined','NaN']) {
 }
 
 for (const file of issueFiles) {
-  const text = await readText(file);
-  if (/mock\s+(article|author|news)|fixture|sample data|demo data/i.test(text)) fail(`Mock/fixture/sample content marker in ${file}`);
+  const issue = await readJson<any>(file, {});
+  if (issue?.metadata?.history_fallback_used === true) fail(`Historical fallback used in ${file}`);
+  if (issue?.metadata?.mock_used === true) fail(`Mock data used in ${file}`);
 }
 
 if (errors.length) {
@@ -146,4 +170,4 @@ if (errors.length) {
   for (const e of errors) console.error(`- ${e}`);
   process.exit(1);
 }
-console.log(`QA passed: ${required.length} files, ${sourcesCount} X account sources, ${issueFiles.length} issue files, ${shownIndex.length} shown-index entries, ${cronMatches.length} scheduled trigger points.`);
+console.log(`QA passed: ${required.length} files, ${sourcesCount} X account sources, ${searchQueryCount} X Article search queries, ${issueFiles.length} issue files, ${shownIndex.length} shown-index entries, ${cronMatches.length} scheduled trigger points.`);
