@@ -1,7 +1,23 @@
 export type ContentType = 'x_article' | 'external_article' | 'company_blog_article' | 'media_article' | 'vc_article' | 'research_blog_article';
 
 export type SourcePlatform = 'x' | 'rss' | 'json_feed' | 'sitemap' | 'html_index' | 'manual' | 'hn' | 'external';
-export type DiscoveryMethod = 'rss' | 'atom' | 'json_feed' | 'sitemap' | 'html_index' | 'manual' | 'curated_x' | 'curated_external' | 'x_profile' | 'x_articles_tab' | 'x_search';
+export type DiscoveryMethod =
+  | 'rss'
+  | 'atom'
+  | 'json_feed'
+  | 'sitemap'
+  | 'html_index'
+  | 'manual'
+  | 'curated_x'
+  | 'curated_live'
+  | 'curated_external'
+  | 'x_profile'
+  | 'x_articles_tab'
+  | 'x_search'
+  | 'static_http'
+  | 'browser_render'
+  | 'discovery_search'
+  | 'fxtwitter';
 
 export type Candidate = {
   id: string;
@@ -35,6 +51,8 @@ export type Candidate = {
   run_id?: string;
   discovery_run_date?: string;
   discovery_method?: DiscoveryMethod;
+  backend?: string;
+  backend_chain?: string[];
   live_fetch?: boolean;
   first_seen_key?: string;
   lastmod?: string;
@@ -58,6 +76,9 @@ export type Candidate = {
   trend_score: number;
   evidence_score: number;
   heat_score: number;
+  article_confidence_score?: number;
+  freshness_score?: number;
+  quality_score?: number;
   site_fit_score: number;
   total_score: number;
   score?: number;
