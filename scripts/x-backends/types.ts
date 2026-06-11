@@ -16,6 +16,7 @@ export type DiscoveryInput = {
 export type ArticleDiscoveryResult = {
   url: string;
   canonical_url: string;
+  article_id?: string;
   title?: string;
   author?: string;
   author_handle?: string;
