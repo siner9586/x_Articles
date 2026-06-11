@@ -1,4 +1,4 @@
-export type FetchBackendName = 'static_http' | 'browser_render' | 'discovery_search' | 'curated_live' | 'fxtwitter';
+export type FetchBackendName = 'static_http' | 'browser_render' | 'discovery_search' | 'curated_live' | 'fxtwitter' | 'nitter_public';
 
 export type DiscoveryInput = {
   issueDate: string;
