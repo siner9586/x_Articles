@@ -56,7 +56,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Resolve Beijing publish_date and preflight current issue
+      - name: Resolve Beijing publish_date, attempt index and preflight current issue
         id: preflight
         shell: bash
         env:
@@ -64,8 +64,50 @@ jobs:
         run: |
           echo "Resolve Beijing publish_date"
           PUBLISH_DATE="$(TZ=Asia/Shanghai date +'%Y-%m-%d')"
+          BJ_TIME="$(TZ=Asia/Shanghai date +'%H:%M')"
           echo "publish_date=${PUBLISH_DATE}" >> "$GITHUB_OUTPUT"
           echo "publish_date=${PUBLISH_DATE} timezone=Asia/Shanghai"
+
+          ATTEMPT_INDEX=30
+          case "$BJ_TIME" in
+            06:12) ATTEMPT_INDEX=1 ;;
+            06:22) ATTEMPT_INDEX=2 ;;
+            06:32) ATTEMPT_INDEX=3 ;;
+            06:42) ATTEMPT_INDEX=4 ;;
+            06:52) ATTEMPT_INDEX=5 ;;
+            07:02) ATTEMPT_INDEX=6 ;;
+            07:12) ATTEMPT_INDEX=7 ;;
+            07:22) ATTEMPT_INDEX=8 ;;
+            07:32) ATTEMPT_INDEX=9 ;;
+            07:42) ATTEMPT_INDEX=10 ;;
+            07:52) ATTEMPT_INDEX=11 ;;
+            08:02) ATTEMPT_INDEX=12 ;;
+            08:12) ATTEMPT_INDEX=13 ;;
+            08:22) ATTEMPT_INDEX=14 ;;
+            08:32) ATTEMPT_INDEX=15 ;;
+            08:42) ATTEMPT_INDEX=16 ;;
+            08:52) ATTEMPT_INDEX=17 ;;
+            09:02) ATTEMPT_INDEX=18 ;;
+            09:12) ATTEMPT_INDEX=19 ;;
+            09:22) ATTEMPT_INDEX=20 ;;
+            09:32) ATTEMPT_INDEX=21 ;;
+            09:42) ATTEMPT_INDEX=22 ;;
+            09:52) ATTEMPT_INDEX=23 ;;
+            10:02) ATTEMPT_INDEX=24 ;;
+            10:12) ATTEMPT_INDEX=25 ;;
+            10:22) ATTEMPT_INDEX=26 ;;
+            10:32) ATTEMPT_INDEX=27 ;;
+            10:42) ATTEMPT_INDEX=28 ;;
+            10:52) ATTEMPT_INDEX=29 ;;
+            11:02) ATTEMPT_INDEX=30 ;;
+          esac
+          FINAL_COMPENSATION=false
+          if [[ "$ATTEMPT_INDEX" -ge 30 ]]; then FINAL_COMPENSATION=true; fi
+          echo "attempt_index=${ATTEMPT_INDEX}" >> "$GITHUB_OUTPUT"
+          echo "total_attempts=30" >> "$GITHUB_OUTPUT"
+          echo "final_compensation=${FINAL_COMPENSATION}" >> "$GITHUB_OUTPUT"
+          echo "attempt_index=${ATTEMPT_INDEX} total_attempts=30 final_compensation=${FINAL_COMPENSATION} beijing_time=${BJ_TIME}"
+
           echo "Preflight: check current issue exists"
           if [[ "${FORCE}" == "true" ]]; then
             echo "skip=false" >> "$GITHUB_OUTPUT"
@@ -99,7 +141,12 @@ jobs:
 
       - name: Install
         if: steps.preflight.outputs.skip != 'true'
-        run: npm ci
+        run: npm install
+
+      - name: Install Playwright browsers
+        if: steps.preflight.outputs.skip != 'true'
+        continue-on-error: true
+        run: npx playwright install chromium
 
       - name: Run daily pipeline
         if: steps.preflight.outputs.skip != 'true'
@@ -107,9 +154,21 @@ jobs:
           TZ: Asia/Shanghai
           ISSUE_DATE: ${{ steps.preflight.outputs.publish_date }}
           X_ARTICLES_FETCH_LIVE: 'true'
+          X_ARTICLES_BROWSER_FETCH: 'true'
+          X_ARTICLES_BROWSER_HEADLESS: 'true'
+          X_ARTICLES_FETCH_BACKENDS: 'static_http,browser_render,discovery_search,curated_live,fxtwitter'
+          X_ARTICLES_MAX_ACCOUNTS: '80'
+          X_ARTICLES_MAX_SEARCH_QUERIES: '30'
+          X_ARTICLES_MAX_CANDIDATES: '200'
+          X_ARTICLES_MIN_SELECTED: '6'
+          X_ARTICLES_ALLOW_EMPTY_ISSUE: 'true'
+          X_ARTICLES_ATTEMPT_INDEX: ${{ steps.preflight.outputs.attempt_index }}
+          X_ARTICLES_TOTAL_ATTEMPTS: ${{ steps.preflight.outputs.total_attempts }}
+          X_ARTICLES_FINAL_COMPENSATION: ${{ steps.preflight.outputs.final_compensation }}
           X_ARTICLES_REQUIRE_LIVE_SELECTED: 'true'
           X_ARTICLES_PRODUCTION: 'true'
           X_ARTICLES_FORCE: ${{ github.event.inputs.force || 'false' }}
+          X_COOKIES_JSON: ${{ secrets.X_COOKIES_JSON }}
         run: npm run daily
 
       - name: Commit and push if changed
@@ -124,7 +183,7 @@ jobs:
           if [[ -n "$(git status --porcelain)" ]]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add data content public/index-data
+            git add data content public/index-data package-lock.json
             git commit -m "chore: update x articles for ${DATE}"
             git push
           else
