@@ -1,0 +1,49 @@
+queries:
+  - query: '"x.com/i/article" AI'
+    priority: 100
+    language: en
+    tags: [ai, x_article]
+  - query: '"x.com/i/article" "AI agents"'
+    priority: 100
+    language: en
+    tags: [ai_agents]
+  - query: '"x.com/i/article" LLM'
+    priority: 95
+    language: en
+    tags: [llm]
+  - query: '"x.com/i/article" "Claude" OR "OpenAI" OR "Gemini"'
+    priority: 95
+    language: en
+    tags: [model]
+  - query: '"x.com/i/article" "startup" "AI"'
+    priority: 90
+    language: en
+    tags: [startup, ai]
+  - query: '"x.com/i/article" "AI coding"'
+    priority: 90
+    language: en
+    tags: [ai_coding]
+  - query: '"x.com/i/article" "context engineering"'
+    priority: 85
+    language: en
+    tags: [context_engineering]
+  - query: '"x.com/i/article" "reasoning model"'
+    priority: 85
+    language: en
+    tags: [reasoning]
+  - query: '"x.com/i/article" 智能体'
+    priority: 85
+    language: zh
+    tags: [智能体]
+  - query: '"x.com/i/article" 大模型'
+    priority: 85
+    language: zh
+    tags: [大模型]
+  - query: '"/articles/" "AI" site:x.com'
+    priority: 82
+    language: en
+    tags: [x_article]
+  - query: '"/article/" "agent" site:x.com'
+    priority: 82
+    language: en
+    tags: [agent]
