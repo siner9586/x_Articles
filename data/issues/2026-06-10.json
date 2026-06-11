@@ -12,9 +12,13 @@
     "non_live_blocked": 0,
     "fetch_failures": 0,
     "live_fetch": false,
+    "empty_reason": "legacy_empty_issue_before_multi_backend_refactor",
+    "history_fallback_used": false,
+    "mock_used": false,
+    "compliance_note": "No historical content was reused.",
     "is_initial_source_index": false,
     "selected_policy": "x_article_only",
-    "note": "Legacy empty issue retained for archive compatibility; it contains no selected content."
+    "note": "Legacy empty issue retained for archive compatibility; it contains no selected content. New empty issues are generated only on final compensation."
   },
   "summary": {
     "one_liner": "本期没有展示条目：未发布任何非 X Article 内容，也未使用历史内容补齐。",
