@@ -1,20 +1,11 @@
 [
   {
-    "issue_date": "2026-06-11",
-    "generated_at": "2026-06-11T01:45:40+08:00",
-    "candidates_count": 0,
-    "selected_count": 0,
-    "must_read_count": 0,
-    "is_initial_source_index": true,
-    "href": "/issues/2026-06-11/"
-  },
-  {
     "issue_date": "2026-06-10",
     "generated_at": "2026-06-10T22:50:16+08:00",
     "candidates_count": 0,
     "selected_count": 0,
     "must_read_count": 0,
-    "is_initial_source_index": true,
+    "is_initial_source_index": false,
     "href": "/issues/2026-06-10/"
   }
 ]

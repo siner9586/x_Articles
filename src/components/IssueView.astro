@@ -27,14 +27,14 @@ const sections = [
         <div class="stat"><strong>{issue?.metadata?.selected_count || 0}</strong><span>selected today</span></div>
         <div class="stat"><strong>{issue?.metadata?.duplicates_blocked || 0}</strong><span>duplicates blocked</span></div>
         <div class="stat"><strong>{issue?.metadata?.fetch_failures || 0}</strong><span>fetch failures</span></div>
-        <div class="stat"><strong>06:12</strong><span>BJT daily</span></div>
+        <div class="stat"><strong>06:12</strong><span>BJT first run</span></div>
       </div>
     </aside>
   </div>
 </section>
 <section class="section">
   <div class="container">
-    {issue?.metadata?.is_initial_source_index && <div class="notice">本期为初始来源索引，不是每日新闻，不是真实抓取趋势，也不是 selected Article 榜单。它用于验证来源库、合规边界、站点结构和自动更新流水线。</div>}
+    {issue?.metadata?.selected_count === 0 && <div class="notice">本期没有展示条目：当日 live fetch 无合格新 X Article 时，系统不会使用历史内容、mock、fixture 或外部文章补齐。</div>}
     <div class="grid" style="margin-top:18px">
       <div class="panel"><h3>本期主要趋势</h3>{(issue?.summary?.main_trends || []).map((t) => <p>{t}</p>)}</div>
       <div class="panel"><h3>本期值得追踪方向</h3>{(issue?.summary?.what_to_watch || []).map((t) => <p>{t}</p>)}</div>
@@ -49,16 +49,6 @@ const sections = [
     </div>
   </section>
 ))}
-{issue?.metadata?.is_initial_source_index && (
-  <section class="section">
-    <div class="container">
-      <div class="section-head"><div><h2>初始来源索引</h2><p>这些是 source entries，不是 selected Articles。</p></div></div>
-      <div class="source-grid">
-        {(issue?.source_index || []).map((s) => <div class="source-card"><strong>{s.name}</strong><small>{s.category} · priority {s.priority}</small><small>{s.use_as}</small><div class="tags">{(s.tags || []).slice(0, 5).map((tag) => <span class="tag">{tag}</span>)}</div></div>)}
-      </div>
-    </div>
-  </section>
-)}
 {issue?.hot_rank?.length > 0 && (
   <section class="section">
     <div class="container">

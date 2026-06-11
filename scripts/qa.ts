@@ -2,22 +2,29 @@ import { promises as fs } from 'node:fs';
 import { parse } from 'yaml';
 import { listFiles, loadYamlList, readJson, readText } from './utils/fs.js';
 import { beijingDate } from './utils/time.js';
+import { buildShownIndex, duplicateReason, selectedItems } from './history-index.js';
+import { attachArticleIdentity, isForbiddenPrimaryUrl, isXArticleUrl, xArticleVerdict } from './x-article.js';
 
 const errors: string[] = [];
 const required = [
   'package.json','astro.config.mjs','tsconfig.json','README.md','.github/workflows/daily.yml',
   'data/sources/x_accounts.yaml','data/sources/external_sources.yaml','data/sources/media.yaml','data/sources/vc_sources.yaml','data/sources/company_sources.yaml','data/sources/research_sources.yaml','data/sources/query_templates.yaml','data/sources/manual_links.yaml','data/sources/curated_x_articles.yaml','data/sources/curated_external_articles.yaml','data/sources/blocklist.yaml','data/sources/source_policy.md',
   'data/archive/used_items.json','public/assets/wechat-qrcode.svg','public/index-data/latest.json','public/index-data/issues.json','public/index-data/search.json',
-  'scripts/collect-sources.ts','scripts/fetch-public.ts','scripts/extract-links.ts','scripts/score-candidates.ts','scripts/dedupe.ts','scripts/cluster.ts','scripts/build-issue.ts','scripts/generate-site-data.ts','scripts/qa.ts',
+  'scripts/collect-sources.ts','scripts/fetch-public.ts','scripts/extract-links.ts','scripts/score-candidates.ts','scripts/dedupe.ts','scripts/cluster.ts','scripts/build-issue.ts','scripts/generate-site-data.ts','scripts/preflight.ts','scripts/daily.ts','scripts/x-article.ts','scripts/history-index.ts','scripts/qa.ts','scripts/test.ts',
   'src/pages/index.astro','src/pages/issues/index.astro','src/pages/issues/latest.astro','src/pages/issues/[date].astro','src/pages/sources.astro','src/pages/topics.astro','src/pages/about.astro','src/pages/search.astro','src/components/Header.astro','src/components/WechatPopover.astro','src/components/ArticleCard.astro','src/layouts/BaseLayout.astro','src/styles/global.css'
 ];
-const allowedTypes = new Set(['x_article']);
+const expectedCrons = [
+  '12 22 * * *','22 22 * * *','32 22 * * *','42 22 * * *','52 22 * * *',
+  '2 23 * * *','12 23 * * *','22 23 * * *','32 23 * * *','42 23 * * *','52 23 * * *',
+  '2 0 * * *','12 0 * * *','22 0 * * *','32 0 * * *','42 0 * * *','52 0 * * *',
+  '2 1 * * *','12 1 * * *','22 1 * * *','32 1 * * *','42 1 * * *','52 1 * * *',
+  '2 2 * * *','12 2 * * *','22 2 * * *','32 2 * * *','42 2 * * *','52 2 * * *',
+  '2 3 * * *'
+];
 
 async function exists(file: string) { try { await fs.access(file); return true; } catch { return false; } }
 function fail(message: string) { errors.push(message); }
-function isXArticleUrl(url = '') {
-  return /^https:\/\/(x\.com|twitter\.com)\//i.test(url) && (/\/articles?\//i.test(url) || /\/i\/article/i.test(url));
-}
+function selectedPath(issueDate: string, index: number) { return `data/issues/${issueDate}.json selected[${index}]`; }
 
 for (const file of required) if (!(await exists(file))) fail(`Missing required file: ${file}`);
 
@@ -25,85 +32,103 @@ for (const file of ['data/sources/x_accounts.yaml','data/sources/external_source
   try { parse(await readText(file)); } catch (e: any) { fail(`Invalid YAML ${file}: ${e.message}`); }
 }
 
+const workflow = await readText('.github/workflows/daily.yml');
+const cronMatches = [...workflow.matchAll(/cron:\s*['"]([^'"]+)['"]/g)].map(m => m[1]);
+if (cronMatches.length !== 30) fail(`GitHub Actions daily workflow must have 30 schedule trigger points, found ${cronMatches.length}`);
+for (const cron of expectedCrons) if (!cronMatches.includes(cron)) fail(`Missing expected UTC cron: ${cron}`);
+for (const phrase of [
+  'workflow_dispatch:',
+  'force:',
+  'concurrency:',
+  'cancel-in-progress: false',
+  'Resolve Beijing publish_date',
+  'Preflight: check current issue exists',
+  'Current issue for ${PUBLISH_DATE} already exists. Skip this compensation run.',
+  'X_ARTICLES_FETCH_LIVE',
+  'npm run daily'
+]) {
+  if (!workflow.includes(phrase)) fail(`daily workflow missing phrase: ${phrase}`);
+}
+
 const latest = await readJson<any>('public/index-data/latest.json', null);
 if (!latest?.metadata?.issue_date) fail('latest.json missing metadata.issue_date');
-const issueDate = latest?.metadata?.issue_date || beijingDate();
-const issueFile = `data/issues/${issueDate}.json`;
-if (!(await exists(issueFile))) fail(`Latest issue does not exist: ${issueFile}`);
-const issue = await readJson<any>(issueFile, {});
-const rawRun = await readJson<any>(`data/raw/${issueDate}-run.json`, {});
-const selected = [...(issue.must_read || []), ...(issue.worth_reading || []), ...(issue.signal_watch || [])];
-if ((issue.metadata?.selected_count || 0) !== selected.length) fail('selected_count does not match selected arrays length');
-
-if (selected.length > 0) {
-  if (rawRun.live_fetch !== true) fail('Selected latest issue must come from live_fetch=true raw run');
-  if ((rawRun.discovery_sources_scanned || 0) < 1 && (rawRun.x_sources_scanned || 0) < 1) fail('Selected latest issue must scan at least one live discovery source');
-}
-
-const urls = new Set<string>();
-const keys = new Set<string>();
-const clusters = new Set<string>();
-for (const item of selected) {
-  for (const field of ['title','canonical_url','summary','reason_selected','total_score','dedupe_key','source_type']) {
-    if (item[field] === undefined || item[field] === null || item[field] === '') fail(`Selected item missing ${field}: ${item.title || item.id}`);
-  }
-  if (!allowedTypes.has(item.content_type)) fail(`Forbidden selected content_type: ${item.content_type}. Selected primary cards must be x_article only.`);
-  if (!isXArticleUrl(item.canonical_url)) fail(`Selected item is not a verified X Article URL: ${item.canonical_url}`);
-  if (item.source_platform !== 'x') fail(`Selected item source_platform must be x: ${item.title}`);
-  if (/thread|podcast|paper_record|github_repo|short_post|product_landing|external_article|company_blog_article|media_article|vc_article|research_blog_article/i.test(String(item.content_type))) fail(`Forbidden primary content type surfaced: ${item.content_type}`);
-  if (item.live_fetch !== true) fail(`Selected item is not from live fetch: ${item.title}`);
-  if (item.discovery_run_date !== issueDate) fail(`Selected item discovery_run_date mismatch: ${item.title}`);
-  if (item.source_platform === 'manual' || item.fetch_status === 'skipped') fail(`Selected item cannot be manual/skipped historical input: ${item.title}`);
-  if (urls.has(item.canonical_url)) fail(`Duplicate selected URL: ${item.canonical_url}`);
-  urls.add(item.canonical_url);
-  if (keys.has(item.dedupe_key)) fail(`Duplicate selected dedupe_key: ${item.dedupe_key}`);
-  keys.add(item.dedupe_key);
-  if (item.cluster_id) {
-    if (clusters.has(item.cluster_id)) fail(`Duplicate selected cluster: ${item.cluster_id}`);
-    clusters.add(item.cluster_id);
-  }
-  if (item.fetch_status === 'failed' && !item.fetch_error) fail(`Failed fetch without fetch_error: ${item.title}`);
-}
-
-const used = await readJson<any[]>('data/archive/used_items.json', []);
-const historical = used.filter(u => u.issue_date !== issueDate);
-for (const item of selected) {
-  if (historical.some(u => u.canonical_url === item.canonical_url || u.dedupe_key === item.dedupe_key || u.title_hash === item.title_hash || u.cluster_id === item.cluster_id)) {
-    fail(`Selected item repeats historical used item: ${item.title}`);
-  }
-}
-
-const issues = await readJson<any[]>('public/index-data/issues.json', []);
+const issuesIndex = await readJson<any[]>('public/index-data/issues.json', []);
 const search = await readJson<any[]>('public/index-data/search.json', []);
-if (!Array.isArray(issues)) fail('issues index is not array');
+if (!Array.isArray(issuesIndex)) fail('issues index is not array');
 if (!Array.isArray(search)) fail('search index is not array');
+if (search.some(item => !isXArticleUrl(item?.url || ''))) fail('search index contains non-X Article URL');
 
-const sourcesCount = (await loadYamlList('data/sources/x_accounts.yaml')).length;
-if (sourcesCount < 20) fail(`X account source library too small: ${sourcesCount}`);
+const issueFiles = await listFiles('data/issues', '.json');
+for (const file of issueFiles) {
+  const issue = await readJson<any>(file, {});
+  const issueDate = issue?.metadata?.issue_date || file.replace(/^.*\/|\.json$/g, '');
+  const selected = selectedItems(issue);
+  if ((issue.metadata?.selected_count || 0) !== selected.length) fail(`${file} selected_count does not match selected arrays length`);
+  if (issue?.source_index?.length) fail(`${file} contains source_index display data; production issues must contain current X Articles only`);
+  selected.forEach((raw, index) => {
+    const item = attachArticleIdentity(raw);
+    const label = selectedPath(issueDate, index);
+    const verdict = xArticleVerdict(item);
+    if (!verdict.ok) fail(`${label} is not a strict X Article: ${verdict.reason} ${item.canonical_url || ''}`);
+    if (isForbiddenPrimaryUrl(item.canonical_url)) fail(`${label} has forbidden primary URL: ${item.canonical_url}`);
+    for (const field of ['title','author','canonical_url','article_url','source_type','fetched_at','fetch_batch_id','source_platform','content_type','content_hash','url_hash','reason_for_selection']) {
+      if (item[field] === undefined || item[field] === null || item[field] === '') fail(`${label} missing ${field}`);
+    }
+    if (item.source_type !== 'x_article' || item.content_type !== 'x_article' || item.source_platform !== 'x') fail(`${label} must be source_type/content_type x_article and source_platform x`);
+    if (item.live_fetch !== true) fail(`${label} is not from live fetch`);
+    if (item.discovery_run_date !== issueDate) fail(`${label} discovery_run_date mismatch`);
+    if (item.fetch_status === 'skipped') fail(`${label} has fetch_status skipped`);
+    if (/thread|podcast|youtube|newsletter|substack|external_article|company_blog_article|media_article|vc_article|research_blog_article|short_post|status/i.test(`${item.content_type} ${item.source_type} ${item.canonical_url}`)) fail(`${label} looks like forbidden non-Article content`);
+  });
 
-const dailyWorkflow = await readText('.github/workflows/daily.yml');
-if (!dailyWorkflow.includes('23 22 * * *')) fail('GitHub Actions cron must be 23 22 * * * for 06:23 BJT');
-if (!dailyWorkflow.includes('X_ARTICLES_FETCH_LIVE')) fail('GitHub Actions must set X_ARTICLES_FETCH_LIVE');
-if (!dailyWorkflow.includes('X_ARTICLES_REQUIRE_LIVE_SELECTED')) fail('GitHub Actions must set X_ARTICLES_REQUIRE_LIVE_SELECTED');
-if (!dailyWorkflow.includes('contents: write')) fail('GitHub Actions permissions.contents must be write');
+  const currentHistory = (await buildShownIndex(issueDate));
+  for (const raw of selected) {
+    const reason = duplicateReason(raw, currentHistory);
+    if (reason) fail(`${file} reuses historical shown content: ${raw.title || raw.canonical_url} (${reason})`);
+  }
+}
+
+const shownIndex = await readJson<any[]>('data/state/shown-index.json', []);
+const rebuilt = await buildShownIndex('');
+if (!Array.isArray(shownIndex)) fail('data/state/shown-index.json is not array');
+if (shownIndex.length !== rebuilt.length) fail(`shown-index length ${shownIndex.length} does not match rebuilt ${rebuilt.length}`);
+for (const entry of shownIndex) {
+  for (const field of ['canonical_url','normalized_url','article_id','url_hash','content_hash','title_hash','author_title_hash','near_title_hash','near_content_hash','shown_date','source_file']) {
+    if (!entry[field]) fail(`shown-index entry missing ${field}: ${entry.title || entry.canonical_url}`);
+  }
+}
+
+const currentDate = beijingDate();
+const currentCandidates = await readJson<any[]>(`data/candidates/${currentDate}.json`, []);
+for (const item of currentCandidates) {
+  const verdict = xArticleVerdict(item);
+  if (!verdict.ok) fail(`Current candidate is not X Article: ${verdict.reason} ${item.canonical_url || item.title || item.id}`);
+  if (item.live_fetch !== true || item.discovery_run_date !== currentDate) fail(`Current candidate lacks current live fetch evidence: ${item.title || item.canonical_url}`);
+}
+
+const currentRaw = await readJson<any>(`data/raw/${currentDate}-run.json`, null);
+if (currentRaw) {
+  if (currentRaw.live_fetch !== true) fail('Current raw run must be live_fetch=true in production data');
+  if (/mock|fixture|sample|fallback historical|previous issue/i.test(JSON.stringify(currentRaw))) fail('Current raw run contains forbidden mock/fixture/sample/fallback marker');
+}
 
 const readme = await readText('README.md');
-for (const phrase of ['不使用付费 API','X paid API','合规边界','去重规则','公众号二维码','06:23','只收录 X Articles','selected 主卡片只允许 x_article']) {
+for (const phrase of ['不使用付费 API','X paid API','合规边界','去重规则','公众号二维码','06:12','只收录 X Articles','shown-index.json','30 次']) {
   if (!readme.includes(phrase)) fail(`README missing phrase: ${phrase}`);
 }
-
-const buildIssue = await readText('scripts/build-issue.ts');
-if (!buildIssue.includes("new Set(['x_article'])")) fail('build-issue must restrict allowed selected content to x_article only');
-if (!buildIssue.includes("source_platform === 'x'")) fail('build-issue must require source_platform === x for selected items');
 
 const header = await readText('src/components/Header.astro');
 const popover = await readText('src/components/WechatPopover.astro');
 const globalCss = await readText('src/styles/global.css');
-if (!header.includes('06:23')) fail('Header must show 06:23 BJT');
+if (!header.includes('06:12')) fail('Header must show 06:12 BJT');
 if (!popover.includes('/assets/wechat-qrcode.svg')) fail('WechatPopover must reference /assets/wechat-qrcode.svg');
+if (!popover.includes('公众号：灵感与观点交流')) fail('WechatPopover trigger must include 公众号：灵感与观点交流');
 if (/base64/i.test(header + popover)) fail('Header/WechatPopover must not contain base64');
 if (!popover.includes('hidden') || !popover.includes('click')) fail('WechatPopover must default hidden and toggle on click');
 if (!(popover + globalCss).includes('86vw') || !(popover + globalCss).includes('translateX(-50%)')) fail('Mobile WeChat popover must be centered and width-limited');
+
+const sourcesCount = (await loadYamlList('data/sources/x_accounts.yaml')).length;
+if (sourcesCount < 20) fail(`X account source library too small: ${sourcesCount}`);
 
 const srcFiles = await listFiles('src/pages', '.astro');
 const allSrc = (await Promise.all([...srcFiles, 'src/components/Header.astro','src/components/WechatPopover.astro','src/components/ArticleCard.astro','src/layouts/BaseLayout.astro','src/styles/global.css'].map(f => readText(f)))).join('\n');
@@ -111,10 +136,9 @@ for (const bad of ['lorem ipsum','undefined','NaN']) {
   if (allSrc.toLowerCase().includes(bad.toLowerCase())) fail(`Display source contains forbidden placeholder: ${bad}`);
 }
 
-const issueFiles = await listFiles('data/issues', '.json');
 for (const file of issueFiles) {
   const text = await readText(file);
-  if (/mock\s+(article|author|news)/i.test(text)) fail(`Mock content marker in ${file}`);
+  if (/mock\s+(article|author|news)|fixture|sample data|demo data/i.test(text)) fail(`Mock/fixture/sample content marker in ${file}`);
 }
 
 if (errors.length) {
@@ -122,4 +146,4 @@ if (errors.length) {
   for (const e of errors) console.error(`- ${e}`);
   process.exit(1);
 }
-console.log(`QA passed: ${required.length} files, ${sourcesCount} X account sources, ${selected.length} selected X Articles, latest ${issueDate}.`);
+console.log(`QA passed: ${required.length} files, ${sourcesCount} X account sources, ${issueFiles.length} issue files, ${shownIndex.length} shown-index entries, ${cronMatches.length} scheduled trigger points.`);

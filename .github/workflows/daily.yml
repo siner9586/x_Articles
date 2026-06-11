@@ -2,14 +2,49 @@ name: Daily X Articles
 
 on:
   schedule:
-    - cron: '23 22 * * *'
+    # Beijing time (UTC+8): 06:12, then every 10 minutes through 11:02.
+    - cron: '12 22 * * *'
+    - cron: '22 22 * * *'
+    - cron: '32 22 * * *'
+    - cron: '42 22 * * *'
+    - cron: '52 22 * * *'
+    - cron: '2 23 * * *'
+    - cron: '12 23 * * *'
+    - cron: '22 23 * * *'
+    - cron: '32 23 * * *'
+    - cron: '42 23 * * *'
+    - cron: '52 23 * * *'
+    - cron: '2 0 * * *'
+    - cron: '12 0 * * *'
+    - cron: '22 0 * * *'
+    - cron: '32 0 * * *'
+    - cron: '42 0 * * *'
+    - cron: '52 0 * * *'
+    - cron: '2 1 * * *'
+    - cron: '12 1 * * *'
+    - cron: '22 1 * * *'
+    - cron: '32 1 * * *'
+    - cron: '42 1 * * *'
+    - cron: '52 1 * * *'
+    - cron: '2 2 * * *'
+    - cron: '12 2 * * *'
+    - cron: '22 2 * * *'
+    - cron: '32 2 * * *'
+    - cron: '42 2 * * *'
+    - cron: '52 2 * * *'
+    - cron: '2 3 * * *'
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Force run even if current issue exists"
+        required: false
+        default: "false"
 
 permissions:
   contents: write
 
 concurrency:
-  group: daily-x-articles
+  group: x-articles-daily-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -20,31 +55,73 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Resolve Beijing publish_date and preflight current issue
+        id: preflight
+        shell: bash
+        env:
+          FORCE: ${{ github.event.inputs.force || 'false' }}
+        run: |
+          echo "Resolve Beijing publish_date"
+          PUBLISH_DATE="$(TZ=Asia/Shanghai date +'%Y-%m-%d')"
+          echo "publish_date=${PUBLISH_DATE}" >> "$GITHUB_OUTPUT"
+          echo "publish_date=${PUBLISH_DATE} timezone=Asia/Shanghai"
+          echo "Preflight: check current issue exists"
+          if [[ "${FORCE}" == "true" ]]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "force=true, bypassing current issue existence preflight only."
+            exit 0
+          fi
+
+          exists=false
+          if [[ -f "data/issues/${PUBLISH_DATE}.json" ]]; then exists=true; fi
+          if [[ -f "content/issues/${PUBLISH_DATE}.md" ]]; then exists=true; fi
+          if [[ -f "public/index-data/latest.json" ]] && grep -q "\"issue_date\"[[:space:]]*:[[:space:]]*\"${PUBLISH_DATE}\"" public/index-data/latest.json; then exists=true; fi
+          if [[ -f "public/index-data/issues.json" ]] && grep -q "\"issue_date\"[[:space:]]*:[[:space:]]*\"${PUBLISH_DATE}\"" public/index-data/issues.json; then exists=true; fi
+          if [[ -f "data/state/shown-index.json" ]] && grep -q "\"shown_date\"[[:space:]]*:[[:space:]]*\"${PUBLISH_DATE}\"" data/state/shown-index.json; then exists=true; fi
+          if [[ -f "data/state/latest-success.json" ]] && grep -q "\"publish_date\"[[:space:]]*:[[:space:]]*\"${PUBLISH_DATE}\"" data/state/latest-success.json; then exists=true; fi
+
+          if [[ "${exists}" == "true" ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Current issue for ${PUBLISH_DATE} already exists. Skip this compensation run."
+            exit 0
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "Preflight passed: current issue does not exist."
+
       - name: Setup Node
+        if: steps.preflight.outputs.skip != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: npm
+
       - name: Install
+        if: steps.preflight.outputs.skip != 'true'
         run: npm ci
+
       - name: Run daily pipeline
+        if: steps.preflight.outputs.skip != 'true'
         env:
           TZ: Asia/Shanghai
+          ISSUE_DATE: ${{ steps.preflight.outputs.publish_date }}
           X_ARTICLES_FETCH_LIVE: 'true'
           X_ARTICLES_REQUIRE_LIVE_SELECTED: 'true'
+          X_ARTICLES_PRODUCTION: 'true'
+          X_ARTICLES_FORCE: ${{ github.event.inputs.force || 'false' }}
         run: npm run daily
-      - name: QA again
-        env:
-          TZ: Asia/Shanghai
-          X_ARTICLES_REQUIRE_LIVE_SELECTED: 'true'
-        run: npm run qa
-      - name: Build again
-        run: npm run build
-      - name: Commit changes
+
+      - name: Commit and push if changed
+        if: steps.preflight.outputs.skip != 'true'
         shell: bash
         run: |
+          DATE="${{ steps.preflight.outputs.publish_date }}"
+          if [[ ! -f "data/issues/${DATE}.json" ]]; then
+            echo "No current issue generated for ${DATE}; skip commit and push for this compensation run."
+            exit 0
+          fi
           if [[ -n "$(git status --porcelain)" ]]; then
-            DATE=$(TZ=Asia/Shanghai date +'%Y-%m-%d')
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data content public/index-data

@@ -1,0 +1,3 @@
+{"logged_at":"2026-06-11T11:54:11+08:00","phase":"dry_run","publish_date":"2026-06-11","status":"would_run_live_pipeline","dry_run":true}
+{"logged_at":"2026-06-11T11:56:36+08:00","phase":"generate","publish_date":"2026-06-11","status":"skipped_no_new_articles","message":"当日 live fetch 无合格新 Article，未使用历史内容补齐","candidates_count":0,"duplicate_candidates_blocked":0,"non_x_blocked":0,"non_live_blocked":0,"forbidden_blocked":0,"live_fetch":true,"history_entries_used_for_dedupe_only":0}
+{"logged_at":"2026-06-11T11:59:41+08:00","phase":"dry_run","publish_date":"2026-06-11","status":"would_run_live_pipeline","dry_run":true}

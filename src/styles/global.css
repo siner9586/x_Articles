@@ -29,10 +29,9 @@ img { max-width: 100%; display: block; }
 .nav a, .wechat-trigger { border: 0; background: transparent; font: inherit; color: #3f3a34; padding: 9px 12px; border-radius: 999px; cursor: pointer; transition: background .18s ease, color .18s ease, transform .18s ease; }
 .nav a:hover, .wechat-trigger:hover { background: var(--soft); color: var(--accent-ink); transform: translateY(-1px); }
 .wechat-wrap { position: relative; display: inline-flex; }
-.wechat-popover { position: absolute; top: calc(100% + 1.25em); right: 0; width: 230px; padding: 12px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface-strong); box-shadow: var(--shadow); z-index: 100; }
+.wechat-popover { position: absolute; top: calc(100% + 2em); left: 2em; width: 230px; padding: 12px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface-strong); box-shadow: var(--shadow); z-index: 100; }
 .wechat-popover[hidden] { display: none; }
 .wechat-popover img { border-radius: 14px; border: 1px solid var(--line); background: #fff; }
-.wechat-popover p { margin: 10px 4px 2px; color: var(--muted); font-size: .82rem; text-align: center; }
 .hero { padding: 64px 0 34px; }
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, .7fr); gap: 28px; align-items: stretch; }
 .eyebrow { color: var(--accent-ink); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: .78rem; }
@@ -75,7 +74,8 @@ p { line-height: 1.75; }
   .nav { justify-content: flex-start; width: 100%; }
   .hero-grid, .grid, .source-grid { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .wechat-popover { position: fixed; top: 6.5rem; left: 50%; right: auto; transform: translateX(-50%); width: min(86vw, 320px); max-width: 86vw; }
+  .wechat-wrap { position: static; }
+  .wechat-popover { position: fixed; top: 7.5rem; left: 50%; right: auto; transform: translateX(-50%); width: min(86vw, 320px); max-width: 86vw; }
 }
 @media (max-width: 520px) {
   .container { width: min(100% - 22px, 1180px); }

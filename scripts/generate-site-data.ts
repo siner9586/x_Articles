@@ -1,4 +1,5 @@
 import { listFiles, readJson, writeJson } from './utils/fs.js';
+import { attachArticleIdentity, isXArticleUrl } from './x-article.js';
 
 export async function generateSiteData(latestIssue: any) {
   await writeJson('public/index-data/latest.json', latestIssue);
@@ -22,7 +23,7 @@ export async function generateSiteData(latestIssue: any) {
   const search = issues.flatMap(meta => {
     const issue = meta.issue_date === latestIssue.metadata.issue_date ? latestIssue : null;
     const items = issue ? [...(issue.must_read || []), ...(issue.worth_reading || []), ...(issue.signal_watch || [])] : [];
-    return items.map((item: any) => ({
+    return items.map((item: any) => attachArticleIdentity(item)).filter((item: any) => isXArticleUrl(item.canonical_url)).map((item: any) => ({
       title: item.title,
       author: item.author,
       organization: item.organization,

@@ -7,8 +7,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="panel"><h2>更新规则</h2><p>每天北京时间 06:12 自动运行。脚本使用 Asia/Shanghai 日期，避免 UTC 日期误判。每期从本期新候选池中选择内容，旧期 JSON 和 Markdown 静态冻结。</p></div>
     <div class="panel"><h2>合规说明</h2><p>不使用付费 API，不使用 X paid API，不绕过登录墙、验证码、Cloudflare、人机验证、反爬机制、rate limit 或付费墙。无法合规访问时只记录公开链接、标题、来源和 fetch_status。</p></div>
     <div class="panel"><h2>评分规则</h2><p>总分 = 来源 20% + 信息密度 20% + 原创性 15% + 趋势 15% + 证据 10% + 热度 10% + 站点匹配 10%。热度最多占 10%。</p></div>
-    <div class="panel"><h2>去重规则</h2><p>每条内容生成 dedupe_key，结合 canonical URL、normalized URL、source URL、title hash、semantic title key、author + title 与 cluster_id；历史 used_items 中出现过的主内容不得再次入选。</p></div>
-    <div class="panel"><h2>如何提交来源</h2><p>新增 X 账号写入 data/sources/x_accounts.yaml；新增外部来源写入对应 source YAML；手动补充长文写入 curated_external_articles.yaml 或 curated_x_articles.yaml。</p></div>
+    <div class="panel"><h2>去重规则</h2><p>每条内容生成 dedupe_key、article_id、URL hash、content hash、title hash、author + title hash 与近似标题/摘要 hash；历史 shown-index 中出现过的主内容不得再次入选。</p></div>
+    <div class="panel"><h2>如何提交来源</h2><p>新增 X 账号写入 data/sources/x_accounts.yaml；手动补充公开 X Article 写入 curated_x_articles.yaml。外部来源只能作为背景或证据，不能成为主卡片。</p></div>
     <div class="panel"><h2>为什么只收录 Articles</h2><p>短帖容易被情绪、流量和上下文缺失干扰；长文更适合保存出处、论证链、证据链接和复盘判断。</p></div>
   </div></div></section>
 </BaseLayout>

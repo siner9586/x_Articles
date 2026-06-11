@@ -1,6 +1,6 @@
 # Source Policy
 
-x_Articles is a compliant, static, article-first signal site. It uses public RSS/Atom feeds, public blog indexes, public sitemaps, manually curated public links, and low-frequency metadata requests. It does not use X paid API, paid third-party data APIs, login-wall bypassing, CAPTCHA bypassing, Cloudflare bypassing, anti-bot evasion, or paywall circumvention.
+x_Articles is a compliant, static, X-Articles-only signal site. Selected primary content can only be public X Articles discovered from public X pages or manually verified public X Article URLs. External RSS/Atom feeds, blog indexes, sitemaps, newsletters, podcasts, videos, and normal X status posts are not selected as primary content. The project does not use X paid API, paid third-party data APIs, login-wall bypassing, CAPTCHA bypassing, Cloudflare bypassing, anti-bot evasion, or paywall circumvention.
 
 X is treated as a discovery layer. Public X Article links, author homepages, and X posts that point to external long-form articles can appear as discovery or evidence, but unverifiable X content is not treated as a fact source by itself. If an X Article or external article cannot be accessed compliantly, the pipeline stores only public metadata, URL, fetch status, and error context.
 

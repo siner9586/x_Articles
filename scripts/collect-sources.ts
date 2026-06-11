@@ -7,10 +7,12 @@ import { fetchText, extractHtmlMeta } from './fetch-public.js';
 import { extractHrefLinks, extractLinks } from './extract-links.js';
 import { assignCluster } from './cluster.js';
 import type { Candidate, DiscoveryMethod } from './utils/types.js';
+import { attachArticleIdentity, canonicalizeUrl, isXArticleUrl as strictIsXArticleUrl, xArticleVerdict } from './x-article.js';
 
 const issueDate = process.env.ISSUE_DATE || beijingDate();
 const capturedAt = beijingISOString();
-const liveFetch = process.env.X_ARTICLES_FETCH_LIVE === 'true';
+const fetchBatchId = process.env.GITHUB_RUN_ID || process.env.X_ARTICLES_FETCH_BATCH_ID || sha1(`${issueDate}|${capturedAt}`);
+const liveFetch = process.env.X_ARTICLES_FETCH_LIVE !== 'false';
 
 const queryRaw = parse(await readText('data/sources/query_templates.yaml', '{}')) || {};
 const topics = [...(queryRaw.topics_en || []), ...(queryRaw.topics_zh || [])];
@@ -33,15 +35,13 @@ function isXDomain(url = ''): boolean {
 }
 
 function isXArticleUrl(url = ''): boolean {
-  const normalized = normalizeUrl(url);
-  if (!isXDomain(normalized)) return false;
-  return /\/i\/article\/[A-Za-z0-9_-]+/i.test(normalized) || /\/[^/?#]+\/articles?\/[A-Za-z0-9_-]+/i.test(normalized);
+  return strictIsXArticleUrl(url);
 }
 
 function normalizeXArticleUrl(url = ''): string {
-  const normalized = normalizeUrl(url);
+  const normalized = canonicalizeUrl(url);
   if (!isXArticleUrl(normalized)) return '';
-  return normalized.replace(/^https:\/\/twitter\.com\//i, 'https://x.com/');
+  return normalized;
 }
 
 function extractXArticleUrls(html = '', baseUrl = ''): string[] {
@@ -74,15 +74,6 @@ function hasSignal(source: any, title: string, description: string, url = ''): b
     /ai|agent|model|coding|inference|llm|claude|context|software|startup|founder|智能体|模型|编程|推理|上下文/i.test(text);
 }
 
-function fallbackTitleFromUrl(url: string, author = ''): string {
-  try {
-    const id = new URL(url).pathname.split('/').filter(Boolean).pop() || '';
-    return cleanText(`X Article ${id}${author ? ` by ${author}` : ''}`);
-  } catch {
-    return cleanText(`X Article${author ? ` by ${author}` : ''}`);
-  }
-}
-
 async function xArticleCandidate(
   source: any,
   url: string,
@@ -104,7 +95,7 @@ async function xArticleCandidate(
   stats.x_article_metadata_fetches += 1;
   if (metaRes.ok) {
     const meta = extractHtmlMeta(metaRes.text, articleUrl);
-    title = cleanText(meta.title || title);
+    title = cleanText(meta.title || title).replace(/\s*\/\s*X$/i, '');
     description = cleanText(meta.description || description);
     status = title || description ? 'partial' : 'failed';
   } else if (!error) {
@@ -113,8 +104,9 @@ async function xArticleCandidate(
 
   const authorHandle = cleanText(seed.author_handle || source.handle || String(seed.author || '').replace(/^@/, ''));
   const author = cleanText(seed.author || source.display_name || source.name || (authorHandle ? `@${authorHandle}` : 'X Article author'));
-  title = title || fallbackTitleFromUrl(articleUrl, authorHandle ? `@${authorHandle}` : author);
-  description = description || `Public X Article discovered from ${source.display_name || source.name || source.handle || 'X'} on ${issueDate}.`;
+  if (!title || !author || !articleUrl) return;
+  description = description || cleanText(seed.summary || seed.excerpt || '');
+  if (!description && status === 'failed') return;
 
   if (containsAny(`${title} ${description}`, blockWords)) return;
   if (!hasSignal(source, title, description, articleUrl)) return;
@@ -124,6 +116,7 @@ async function xArticleCandidate(
   const item: Candidate = {
     id: sha1(`${articleUrl}|${title}`),
     canonical_url: articleUrl,
+    article_url: articleUrl,
     source_url: sourceUrl || articleUrl,
     source_platform: 'x',
     source_type: 'x_article',
@@ -137,6 +130,9 @@ async function xArticleCandidate(
     language: source.language || seed.language || (/[一-龥]/.test(title + description) ? 'zh' : 'en'),
     published_at: cleanText(seed.published_at || seed.date || ''),
     captured_at: capturedAt,
+    fetched_at: capturedAt,
+    fetch_batch_id: fetchBatchId,
+    run_id: fetchBatchId,
     discovery_run_date: issueDate,
     discovery_method: method,
     live_fetch: true,
@@ -154,11 +150,24 @@ async function xArticleCandidate(
     mentioned_papers: [],
     mentioned_repos: evidence.filter((u: string) => /github\.com/i.test(u)),
     evidence_links: evidence,
-    engagement: {
+    heat_metrics: {
       bookmarks: Number(seed.bookmarks || 0) || undefined,
       likes: Number(seed.likes || 0) || undefined,
       retweets: Number(seed.retweets || 0) || undefined,
+      reposts: Number(seed.reposts || seed.retweets || 0) || undefined,
+      replies: Number(seed.replies || 0) || undefined,
       impressions: Number(seed.impressions || 0) || undefined,
+      views: Number(seed.views || seed.impressions || 0) || undefined,
+      author_followers: Number(seed.author_followers || source.followers || 0) || undefined,
+      author_verified: seed.author_verified ?? source.verified ?? undefined,
+      score: Number(seed.heat_score || seed.bookmarks || seed.likes || 0) || undefined
+    },
+    engagement: {
+      bookmarks: Number(seed.bookmarks || 0) || undefined,
+      likes: Number(seed.likes || 0) || undefined,
+      retweets: Number(seed.retweets || seed.reposts || 0) || undefined,
+      replies: Number(seed.replies || 0) || undefined,
+      impressions: Number(seed.impressions || seed.views || 0) || undefined,
       score: Number(seed.heat_score || seed.bookmarks || seed.likes || 0) || undefined
     },
     source_score: Number(source.priority || seed.priority || 76),
@@ -178,9 +187,11 @@ async function xArticleCandidate(
     first_seen_issue: issueDate,
     last_seen_issue: issueDate
   };
+  const verdict = xArticleVerdict(item);
+  if (!verdict.ok) return;
   item.cluster_id = assignCluster(item, issueDate);
   item.dedupe_key = makeDedupeKey(item);
-  return item;
+  return attachArticleIdentity(item);
 }
 
 function xSeedUrls(account: any): string[] {
@@ -197,6 +208,7 @@ function xSeedUrls(account: any): string[] {
 }
 
 async function scanXAccount(account: any, candidates: Candidate[], errors: any[]) {
+  if (!account?.x_url || /TODO|needs_manual_confirmation/i.test(`${account.handle || ''} ${account.verify_status || ''}`)) return;
   for (const seedUrl of xSeedUrls(account)) {
     stats.x_sources_attempted += 1;
     stats.x_profile_pages_attempted += 1;
@@ -257,14 +269,14 @@ async function run() {
     await Promise.all(Array.from({ length: concurrency }, worker));
     for (const seed of curatedX) await scanCuratedXArticle(seed, candidates, errors);
   } else {
-    for (const seed of curatedX) {
-      const c = await xArticleCandidate({ display_name: seed.author || 'Curated X Article', handle: seed.author_handle || '', priority: seed.priority || 76, tags: seed.tags || [] }, seed.url || seed.source_url || '', seed.source_url || seed.url || '', 'curated_x', seed, false, 'local non-live run');
-      if (c) candidates.push({ ...c, live_fetch: false, fetch_status: 'skipped' });
-    }
+    errors.push({ source: 'pipeline', phase: 'live_fetch_disabled', error: 'Non-live candidate fallback is disabled; no mock, fixture, sample, curated-only, or historical candidates were emitted.' });
   }
 
   const uniqueByKey = new Map<string, Candidate>();
-  for (const c of candidates) if (!uniqueByKey.has(c.dedupe_key)) uniqueByKey.set(c.dedupe_key, c);
+  for (const c of candidates) {
+    const item = attachArticleIdentity(c);
+    if (!uniqueByKey.has(item.dedupe_key)) uniqueByKey.set(item.dedupe_key, item);
+  }
   const finalCandidates = [...uniqueByKey.values()];
   await writeJson(`data/candidates/${issueDate}.json`, finalCandidates);
   await writeJson(`data/raw/${issueDate}-run.json`, {
@@ -276,6 +288,8 @@ async function run() {
     fetch_failures: errors.length,
     errors: errors.slice(0, 160),
     live_fetch: liveFetch,
+    fetch_batch_id: fetchBatchId,
+    candidate_source_policy: 'current live fetch only; history is not read by collect-sources',
     ...stats,
     discovery_sources_attempted: stats.x_sources_attempted,
     discovery_sources_scanned: stats.x_sources_scanned + stats.curated_x_candidates,

@@ -25,7 +25,7 @@ selected 主卡片必须同时满足：
 - `live_fetch === true`
 - `discovery_run_date === issue_date`
 - `fetch_status !== 'skipped'`
-- 不得命中历史 `used_items.json` 中的 URL、dedupe key、title hash 或 cluster ID
+- 不得命中历史 `shown-index.json` 中的 URL、article_id、hash 或近似重复内容
 
 普通短帖、纯 thread、播客单集、论文条目、GitHub 仓库、产品页、公司官网文章、媒体文章、VC 文章、研究博客文章都不能作为 selected 主卡片。
 
@@ -60,14 +60,10 @@ selected 主卡片必须同时满足：
 每天运行：
 
 ```bash
-npm run collect
-npm run score
-npm run build:issue
-npm run qa
-npm run build
+npm run daily
 ```
 
-GitHub Actions 中会设置 `X_ARTICLES_FETCH_LIVE=true` 和 `X_ARTICLES_REQUIRE_LIVE_SELECTED=true` 执行当日真实公开抓取。本地未设置该变量时只允许生成稳定的初始来源索引，不能产出 selected 主卡片。
+`daily` pipeline 按阶段执行：Resolve Beijing publish_date、Preflight、Live fetch X Articles、Validate、Build historical shown index、Exclude history、Score、Generate、QA、Build。生产模式中 `X_ARTICLES_FETCH_LIVE=true`，当期候选池只能来自本次 live fetch。
 
 抓取与发现策略遵循：
 
@@ -75,6 +71,7 @@ GitHub Actions 中会设置 `X_ARTICLES_FETCH_LIVE=true` 和 `X_ARTICLES_REQUIRE
 2. 只能将可验证的 X Article URL 写入 selected。
 3. 外部官网、媒体、博客、VC、研究机构页面即使抓取成功，也只能作为 evidence/background，不能进入 selected。
 4. 脚本不会绕过登录墙、付费墙、验证码、反爬、rate limit 或 Cloudflare。
+5. 如果当日 live fetch 没有合格新 Article，本期跳过生成，并记录“当日 live fetch 无合格新 Article，未使用历史内容补齐”。
 
 ## 7. X 使用边界
 
@@ -114,18 +111,23 @@ site_fit_score * 0.10
 
 ## 9. 去重规则
 
-每条内容生成 `dedupe_key`，至少考虑：
+每条内容生成 `dedupe_key` 与 shown index 字段，至少考虑：
 
 - canonical URL
 - normalized URL
+- article_id
+- url_hash
+- content_hash
 - source URL
 - title hash
+- near title hash
+- near content hash
 - semantic title key
 - author + title
 - external URL
 - cluster ID
 
-每次生成新一期前读取 `data/archive/used_items.json`。如果候选内容的 canonical URL、dedupe key、title hash 或 cluster ID 已存在于历史 used items，不得进入 selected。第二期不得重复第一期，第三期不得重复第一期和第二期，后续同理。
+每次生成新一期前都会从 `data/issues/*.json` 重建 `data/state/shown-index.json`。如果候选内容命中历史 canonical URL、normalized URL、article_id、url_hash、content_hash、title_hash、author_title_hash、near_title_hash、near_content_hash 或近似标题/摘要，不得进入 selected。`data/archive/used_items.json` 只保留为兼容输出，不再作为候选来源。
 
 最新一期 selected 主卡片还必须满足：`content_type === 'x_article'`、`source_platform === 'x'`、`canonical_url` 为 X/Twitter Article URL、`live_fetch === true`、`discovery_run_date === issue_date`、`fetch_status !== skipped`。旧内容可以作为 background source，但不能作为最新一期主内容。
 
@@ -133,10 +135,43 @@ site_fit_score * 0.10
 
 GitHub Actions 文件：`.github/workflows/daily.yml`。
 
-北京时间每天 06:23 自动运行。GitHub Actions 使用 UTC，因此 cron 为：
+正式更新时间为北京时间 06:12，补偿间隔 10 分钟，总尝试检查次数为 30 次。北京时间触发点为：
 
-```yaml
-23 22 * * *
+06:12、06:22、06:32、06:42、06:52、07:02、07:12、07:22、07:32、07:42、07:52、08:02、08:12、08:22、08:32、08:42、08:52、09:02、09:12、09:22、09:32、09:42、09:52、10:02、10:12、10:22、10:32、10:42、10:52、11:02。
+
+对应 UTC cron 为：
+
+```text
+12 22 * * *
+22 22 * * *
+32 22 * * *
+42 22 * * *
+52 22 * * *
+2 23 * * *
+12 23 * * *
+22 23 * * *
+32 23 * * *
+42 23 * * *
+52 23 * * *
+2 0 * * *
+12 0 * * *
+22 0 * * *
+32 0 * * *
+42 0 * * *
+52 0 * * *
+2 1 * * *
+12 1 * * *
+22 1 * * *
+32 1 * * *
+42 1 * * *
+52 1 * * *
+2 2 * * *
+12 2 * * *
+22 2 * * *
+32 2 * * *
+42 2 * * *
+52 2 * * *
+2 3 * * *
 ```
 
 workflow 支持 `workflow_dispatch` 手动触发。commit message：
@@ -164,7 +199,13 @@ npm run dev
 
 ## 12. GitHub Actions 说明
 
-`daily.yml` 会 checkout、setup Node、`npm ci`、运行 daily pipeline、再次 QA 和 build，然后只在 `data`、`content`、`public/index-data` 有变更时自动提交。workflow 只在 schedule 或 workflow_dispatch 触发，避免 push 无限循环。
+`daily.yml` 会 checkout 后先解析北京时间 publish_date 并做 preflight。如果 `data/issues/YYYY-MM-DD.json`、`content/issues/YYYY-MM-DD.md`、`public/index-data/latest.json`、`public/index-data/issues.json`、`data/state/shown-index.json` 或 `data/state/latest-success.json` 表明当期已存在，且 `force != true`，workflow 立即输出：
+
+```text
+Current issue for YYYY-MM-DD already exists. Skip this compensation run.
+```
+
+随后不再安装依赖、不 live fetch、不生成、不 QA、不 build、不 commit、不 push，run 以 success 结束。workflow 使用 `concurrency: x-articles-daily-${{ github.ref }}` 和 `cancel-in-progress: false`，避免多个补偿触发点并发写同一天内容。只有手动 `workflow_dispatch force=true` 才允许绕过“当期已存在”这个 preflight；即使 force=true，也不得使用历史内容作为新候选。若 live fetch 没有合格新 Article 且未生成 `data/issues/YYYY-MM-DD.json`，commit 步骤也会跳过，避免补偿 run 反复提交空转 raw 日志。
 
 `pages.yml` 可将 Astro 静态站部署到 GitHub Pages。Cloudflare Pages / Netlify 也可直接使用：
 
@@ -197,6 +238,11 @@ GitHub Pages：启用 Pages，source 选择 GitHub Actions，由 `.github/workfl
 历史去重保存为：
 
 - `data/archive/used_items.json`
+- `data/state/shown-index.json`
+- `data/state/run-log.jsonl`
+- `data/state/latest-success.json`
+
+`shown-index.json` 可由历史 issue 重建，不依赖手动维护。历史索引只用于排除，不得用于生成或补齐。
 
 ## 15. 如何添加新的 X 账号
 
@@ -225,11 +271,11 @@ GitHub Pages：启用 Pages，source 选择 GitHub Actions，由 `.github/workfl
 
 ## 17. 如何避免重复使用旧内容
 
-不要手动删除 `data/archive/used_items.json`。新增候选在 `build-issue` 阶段会和历史 used items 比较，重复 URL、dedupe key、title hash 或 cluster ID 会被阻止进入 selected。
+不要手动把旧内容复制进候选池。新增候选在 `build-issue` 阶段会和 `shown-index.json` 比较，重复 URL、article_id、content hash、title hash、author+title hash 或近似标题/摘要都会被阻止进入 selected。
 
 ## 18. QA 检查
 
-`npm run qa` 检查必要文件、YAML/JSON 可解析、latest 指向真实日期、selected_count、X Article 类型、X/Twitter Article URL、重复 URL、重复 dedupe_key、历史重复、搜索索引、GitHub Actions cron、当日 live fetch selected 强约束、README 合规说明、公众号二维码路径、弹层默认隐藏、移动端水平居中和页面中不出现占位符。
+`npm run qa` 检查必要文件、YAML/JSON 可解析、所有 issue 的 selected_count、X Article 类型、X/Twitter Article URL、重复 URL、重复 hash、历史重复、搜索索引、30 次 GitHub Actions cron、preflight、concurrency、当日 live fetch selected 强约束、禁止 mock/fixture/sample/fallback、README 合规说明、公众号二维码路径、弹层默认隐藏、移动端水平居中和页面中不出现占位符。
 
 ## 19. 公众号二维码组件说明
 
@@ -251,7 +297,7 @@ Header / 组件只引用 `/assets/wechat-qrcode.svg`。不在组件中写 base64
 
 **为什么有 fetch failures？**
 
-公开来源可能没有 RSS、网络超时、拒绝非浏览器请求或内容需要登录。项目会合规降级，不强抓正文，不让 workflow 因单个来源失败而中断。
+公开来源可能网络超时、拒绝非浏览器请求或内容需要登录。项目会合规降级，不强抓正文，不让 workflow 因单个来源失败而中断。
 
 **为什么公司官网文章、论文、GitHub、播客没有出现在主卡片？**
 

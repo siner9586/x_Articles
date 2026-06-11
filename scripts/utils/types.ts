@@ -6,6 +6,14 @@ export type DiscoveryMethod = 'rss' | 'atom' | 'json_feed' | 'sitemap' | 'html_i
 export type Candidate = {
   id: string;
   canonical_url: string;
+  article_url?: string;
+  normalized_url?: string;
+  article_id?: string;
+  url_hash?: string;
+  content_hash?: string;
+  near_title_hash?: string;
+  near_content_hash?: string;
+  author_title_hash?: string;
   source_url: string;
   source_platform: SourcePlatform;
   source_type: string;
@@ -14,12 +22,17 @@ export type Candidate = {
   title: string;
   subtitle?: string;
   author?: string;
+  author_url?: string;
   author_handle?: string;
   author_role?: string;
   organization?: string;
   language?: string;
   published_at?: string;
   captured_at: string;
+  discovered_at?: string;
+  fetched_at?: string;
+  fetch_batch_id?: string;
+  run_id?: string;
   discovery_run_date?: string;
   discovery_method?: DiscoveryMethod;
   live_fetch?: boolean;
@@ -37,6 +50,7 @@ export type Candidate = {
   mentioned_papers: string[];
   mentioned_repos: string[];
   evidence_links: string[];
+  heat_metrics?: Record<string, number | boolean | undefined>;
   engagement: Record<string, number | undefined>;
   source_score: number;
   information_density_score: number;
@@ -46,12 +60,16 @@ export type Candidate = {
   heat_score: number;
   site_fit_score: number;
   total_score: number;
+  score?: number;
   rank?: number;
   cluster_id?: string;
   dedupe_key: string;
   title_hash: string;
   status: 'candidate' | 'selected' | 'archived' | 'rejected';
   reason_selected?: string;
+  reason_for_selection?: string;
+  summary_zh?: string;
+  summary_en?: string;
   reason_rejected?: string;
   fetch_status: 'ok' | 'partial' | 'failed' | 'skipped';
   fetch_error?: string;

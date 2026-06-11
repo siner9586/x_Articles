@@ -5,6 +5,6 @@ import issues from '../../../public/index-data/issues.json';
 <BaseLayout title="Issues | X Articles Daily">
   <section class="hero"><div class="container"><div class="eyebrow">Archive</div><h1>Issues</h1><p class="lead">旧期静态冻结；latest 只指向最新日期，不覆盖历史 issue 文件。</p></div></section>
   <section class="section"><div class="container"><div class="source-grid">
-    {issues.map((issue) => <a class="source-card" href={issue.href}><strong>{issue.issue_date}</strong><small>{issue.is_initial_source_index ? '初始来源索引期' : 'Daily Articles issue'}</small><small>候选 {issue.candidates_count} · 入选 {issue.selected_count} · Must Read {issue.must_read_count}</small><small>生成 {issue.generated_at}</small></a>)}
+    {issues.map((issue) => <a class="source-card" href={issue.href}><strong>{issue.issue_date}</strong><small>Daily X Articles issue</small><small>候选 {issue.candidates_count} · 入选 {issue.selected_count} · Must Read {issue.must_read_count}</small><small>生成 {issue.generated_at}</small></a>)}
   </div></div></section>
 </BaseLayout>

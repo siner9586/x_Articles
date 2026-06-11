@@ -7,9 +7,13 @@
     "collect": "tsx scripts/collect-sources.ts",
     "score": "tsx scripts/score-candidates.ts",
     "build:issue": "tsx scripts/build-issue.ts",
+    "preflight": "tsx scripts/preflight.ts",
+    "state:rebuild": "tsx -e \"import('./scripts/history-index.ts').then(async m => { const idx = await m.rebuildShownIndex(''); await m.writeUsedItemsCompat(idx); console.log('rebuilt shown index', idx.length); })\"",
+    "indexes:rebuild": "tsx scripts/rebuild-indexes.ts",
     "qa": "tsx scripts/qa.ts",
+    "test": "tsx scripts/test.ts",
     "build": "astro build",
-    "daily": "npm run collect && npm run score && npm run build:issue && npm run qa && npm run build"
+    "daily": "tsx scripts/daily.ts"
   },
   "dependencies": {
     "astro": "^4.16.18",
