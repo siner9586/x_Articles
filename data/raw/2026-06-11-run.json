@@ -1,463 +1,96 @@
 {
   "issue_date": "2026-06-11",
-  "captured_at": "2026-06-11T11:54:42+08:00",
+  "captured_at": "2026-06-11T19:58:36+08:00",
+  "attempt_index": 30,
+  "total_attempts": 30,
+  "final_compensation": true,
   "sources_scanned": 23,
-  "live_sources_scanned": 0,
-  "candidates_count": 0,
-  "fetch_failures": 72,
+  "live_sources_scanned": 9,
+  "candidates_count": 6,
+  "selected_count": 0,
+  "fetch_failures": 1,
   "errors": [
     {
-      "source": "OpenAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/OpenAI",
-      "error": "timeout"
-    },
-    {
-      "source": "AnthropicAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/AnthropicAI",
-      "error": "timeout"
-    },
-    {
-      "source": "GoogleDeepMind",
-      "phase": "x_public_scan",
-      "url": "https://x.com/GoogleDeepMind",
-      "error": "timeout"
-    },
-    {
-      "source": "GoogleAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/GoogleAI",
-      "error": "timeout"
-    },
-    {
-      "source": "AIatMeta",
-      "phase": "x_public_scan",
-      "url": "https://x.com/AIatMeta",
-      "error": "timeout"
-    },
-    {
-      "source": "OpenAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/OpenAI/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "AnthropicAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/AnthropicAI/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "GoogleDeepMind",
-      "phase": "x_public_scan",
-      "url": "https://x.com/GoogleDeepMind/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "GoogleAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/GoogleAI/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "AIatMeta",
-      "phase": "x_public_scan",
-      "url": "https://x.com/AIatMeta/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "OpenAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AOpenAI%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "AnthropicAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AAnthropicAI%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "GoogleDeepMind",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AGoogleDeepMind%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "GoogleAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AGoogleAI%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "AIatMeta",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AAIatMeta%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "OpenAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AOpenAI%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "AnthropicAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AAnthropicAI%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "GoogleDeepMind",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AGoogleDeepMind%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "GoogleAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AGoogleAI%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "AIatMeta",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AAIatMeta%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "xai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/xai",
-      "error": "timeout"
-    },
-    {
-      "source": "MistralAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/MistralAI",
-      "error": "timeout"
-    },
-    {
-      "source": "cohere",
-      "phase": "x_public_scan",
-      "url": "https://x.com/cohere",
-      "error": "timeout"
-    },
-    {
-      "source": "StabilityAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/StabilityAI",
-      "error": "timeout"
-    },
-    {
-      "source": "NVIDIAAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/NVIDIAAI",
-      "error": "timeout"
-    },
-    {
-      "source": "xai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/xai/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "MistralAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/MistralAI/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "cohere",
-      "phase": "x_public_scan",
-      "url": "https://x.com/cohere/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "StabilityAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/StabilityAI/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "NVIDIAAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/NVIDIAAI/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "xai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Axai%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "MistralAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AMistralAI%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "cohere",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Acohere%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "StabilityAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AStabilityAI%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "NVIDIAAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3ANVIDIAAI%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "xai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Axai%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "MistralAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AMistralAI%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "cohere",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Acohere%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "StabilityAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3AStabilityAI%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "NVIDIAAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3ANVIDIAAI%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "huggingface",
-      "phase": "x_public_scan",
-      "url": "https://x.com/huggingface",
-      "error": "timeout"
-    },
-    {
-      "source": "LangChainAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/LangChainAI",
-      "error": "timeout"
-    },
-    {
-      "source": "llama_index",
-      "phase": "x_public_scan",
-      "url": "https://x.com/llama_index",
-      "error": "timeout"
-    },
-    {
-      "source": "cursor_ai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/cursor_ai",
-      "error": "timeout"
-    },
-    {
-      "source": "perplexity_ai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/perplexity_ai",
-      "error": "timeout"
-    },
-    {
-      "source": "huggingface",
-      "phase": "x_public_scan",
-      "url": "https://x.com/huggingface/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "LangChainAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/LangChainAI/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "llama_index",
-      "phase": "x_public_scan",
-      "url": "https://x.com/llama_index/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "cursor_ai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/cursor_ai/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "perplexity_ai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/perplexity_ai/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "huggingface",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Ahuggingface%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "LangChainAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3ALangChainAI%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "llama_index",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Allama_index%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "cursor_ai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Acursor_ai%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "perplexity_ai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Aperplexity_ai%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "huggingface",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Ahuggingface%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "LangChainAI",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3ALangChainAI%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "llama_index",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Allama_index%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "cursor_ai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Acursor_ai%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "perplexity_ai",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Aperplexity_ai%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "a16z",
-      "phase": "x_public_scan",
-      "url": "https://x.com/a16z",
-      "error": "timeout"
-    },
-    {
-      "source": "sequoia",
-      "phase": "x_public_scan",
-      "url": "https://x.com/sequoia",
-      "error": "timeout"
-    },
-    {
-      "source": "TechCrunch",
-      "phase": "x_public_scan",
-      "url": "https://x.com/TechCrunch",
-      "error": "timeout"
-    },
-    {
-      "source": "a16z",
-      "phase": "x_public_scan",
-      "url": "https://x.com/a16z/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "sequoia",
-      "phase": "x_public_scan",
-      "url": "https://x.com/sequoia/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "TechCrunch",
-      "phase": "x_public_scan",
-      "url": "https://x.com/TechCrunch/articles",
-      "error": "timeout"
-    },
-    {
-      "source": "a16z",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Aa16z%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "sequoia",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Asequoia%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "TechCrunch",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3ATechCrunch%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "a16z",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Aa16z%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "sequoia",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3Asequoia%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
-    },
-    {
-      "source": "TechCrunch",
-      "phase": "x_public_scan",
-      "url": "https://x.com/search?q=from%3ATechCrunch%20filter%3Alinks%20article&src=typed_query&f=live",
-      "error": "timeout"
+      "backend": "static_http",
+      "phase": "discover",
+      "source": "https://x.com/LangChainAI",
+      "error": "HTTP 404"
     }
   ],
   "live_fetch": true,
-  "fetch_batch_id": "983a8c6fa111a276",
+  "fetch_batch_id": "27345110840",
+  "backends_enabled": [
+    "static_http",
+    "browser_render",
+    "discovery_search",
+    "nitter_public",
+    "curated_live",
+    "fxtwitter"
+  ],
+  "backend_stats": {
+    "static_http": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 6,
+      "failed": 1,
+      "skipped": 0,
+      "article_urls_found": 7
+    },
+    "browser_render": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 3,
+      "failed": 0,
+      "skipped": 0,
+      "article_urls_found": 3
+    },
+    "discovery_search": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 0,
+      "failed": 0,
+      "skipped": 0,
+      "article_urls_found": 0
+    },
+    "nitter_public": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 0,
+      "failed": 0,
+      "skipped": 1,
+      "article_urls_found": 0
+    },
+    "curated_live": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 0,
+      "failed": 0,
+      "skipped": 0,
+      "article_urls_found": 0
+    },
+    "fxtwitter": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 0,
+      "failed": 0,
+      "skipped": 0,
+      "article_urls_found": 0
+    }
+  },
   "candidate_source_policy": "current live fetch only; history is not read by collect-sources",
-  "x_sources_attempted": 72,
-  "x_sources_scanned": 0,
-  "x_profile_pages_attempted": 72,
-  "x_profile_pages_scanned": 0,
-  "x_article_urls_found": 0,
+  "x_sources_attempted": 23,
   "curated_x_candidates": 0,
-  "x_article_metadata_fetches": 0,
-  "discovery_sources_attempted": 72,
-  "discovery_sources_scanned": 0,
-  "selected_policy": "x_article_only",
-  "compliance": "X Articles only. No paid API, no X paid API, no login-wall bypass, no CAPTCHA bypass, no Cloudflare bypass, no paywall circumvention, no full copyrighted article body storage.",
-  "generation_status": "skipped_no_new_articles",
-  "generation_message": "当日 live fetch 无合格新 Article，未使用历史内容补齐",
-  "history_entries_used_for_dedupe_only": 0,
-  "duplicate_candidates_blocked": 0,
+  "search_queries_attempted": 12,
+  "x_article_urls_found": 10,
+  "discovery_sources_attempted": 6,
+  "discovery_sources_scanned": 9,
+  "duplicates_blocked": 0,
   "non_x_blocked": 0,
-  "non_live_blocked": 0,
-  "forbidden_blocked": 0
+  "non_article_blocked": 0,
+  "history_fallback_used": false,
+  "mock_used": false,
+  "empty_issue_generated": false,
+  "empty_reason": "",
+  "selected_policy": "x_article_only",
+  "compliance": "X Articles only. No paid API, no X paid API, no login-wall bypass, no CAPTCHA bypass, no Cloudflare bypass, no paywall circumvention, no full copyrighted article body storage."
 }
