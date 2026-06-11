@@ -5,13 +5,14 @@ import { BrowserRenderBackend } from './browser-render.js';
 import { DiscoverySearchBackend } from './discovery-search.js';
 import { CuratedLiveBackend } from './curated-live.js';
 import { FxTwitterBackend } from './fxtwitter.js';
+import { NitterPublicBackend } from './nitter-public.js';
 
 function emptyStat(): BackendStat {
   return { attempted: 0, ok: 0, partial: 0, failed: 0, skipped: 0, article_urls_found: 0 };
 }
 
 function enabledBackendNames(): FetchBackendName[] {
-  const raw = process.env.X_ARTICLES_FETCH_BACKENDS || 'static_http,browser_render,discovery_search,curated_live,fxtwitter';
+  const raw = process.env.X_ARTICLES_FETCH_BACKENDS || 'static_http,browser_render,discovery_search,nitter_public,curated_live,fxtwitter';
   return raw.split(',').map(s => s.trim()).filter(Boolean) as FetchBackendName[];
 }
 
@@ -19,6 +20,7 @@ function backendFactory(name: FetchBackendName): XArticleBackend | undefined {
   if (name === 'static_http') return new StaticHttpBackend();
   if (name === 'browser_render') return new BrowserRenderBackend();
   if (name === 'discovery_search') return new DiscoverySearchBackend();
+  if (name === 'nitter_public') return new NitterPublicBackend();
   if (name === 'curated_live') return new CuratedLiveBackend();
   if (name === 'fxtwitter') return new FxTwitterBackend();
   return undefined;
