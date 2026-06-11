@@ -22,7 +22,7 @@ function runStep(name: string, command: string, commandArgs: string[]) {
       TZ: 'Asia/Shanghai',
       X_ARTICLES_FETCH_LIVE: 'true',
       X_ARTICLES_BROWSER_FETCH: process.env.X_ARTICLES_BROWSER_FETCH || 'true',
-      X_ARTICLES_FETCH_BACKENDS: process.env.X_ARTICLES_FETCH_BACKENDS || 'static_http,browser_render,discovery_search,curated_live,fxtwitter',
+      X_ARTICLES_FETCH_BACKENDS: process.env.X_ARTICLES_FETCH_BACKENDS || 'static_http,browser_render,discovery_search,nitter_public,curated_live,fxtwitter',
       X_ARTICLES_REQUIRE_LIVE_SELECTED: 'true',
       X_ARTICLES_PRODUCTION: 'true',
       X_ARTICLES_ATTEMPT_INDEX: String(attemptIndex),
@@ -52,7 +52,7 @@ async function main() {
   console.log('candidate_policy=current live fetch is the only candidate source');
   console.log('history_policy=historical issues are read only for exclusion and idempotency, never for generation');
   console.log('fallback_policy=no mock, no fixture, no sample, no historical fallback, no previous issue copy');
-  console.log('backend_policy=static_http + browser_render + discovery_search + curated_live + fxtwitter; Playwright failures degrade gracefully');
+  console.log('backend_policy=static_http + browser_render + discovery_search + nitter_public + curated_live + fxtwitter; Playwright/Nitter failures degrade gracefully');
 
   if (dryRun) {
     const latest = await readJson<any>('public/index-data/latest.json', null);
