@@ -11,7 +11,7 @@ const required = [
   'data/sources/x_accounts.yaml','data/sources/external_sources.yaml','data/sources/media.yaml','data/sources/vc_sources.yaml','data/sources/company_sources.yaml','data/sources/research_sources.yaml','data/sources/query_templates.yaml','data/sources/x_article_search_queries.yaml','data/sources/manual_links.yaml','data/sources/curated_x_articles.yaml','data/sources/curated_external_articles.yaml','data/sources/blocklist.yaml','data/sources/source_policy.md',
   'data/archive/used_items.json','public/assets/wechat-qrcode.svg','public/index-data/latest.json','public/index-data/issues.json','public/index-data/search.json',
   'scripts/collect-sources.ts','scripts/fetch-public.ts','scripts/extract-links.ts','scripts/score-candidates.ts','scripts/dedupe.ts','scripts/cluster.ts','scripts/build-issue.ts','scripts/generate-site-data.ts','scripts/preflight.ts','scripts/daily.ts','scripts/x-article.ts','scripts/history-index.ts','scripts/qa.ts','scripts/test.ts',
-  'scripts/x-backends/types.ts','scripts/x-backends/utils.ts','scripts/x-backends/static-http.ts','scripts/x-backends/browser-render.ts','scripts/x-backends/discovery-search.ts','scripts/x-backends/curated-live.ts','scripts/x-backends/fxtwitter.ts','scripts/x-backends/index.ts',
+  'scripts/x-backends/types.ts','scripts/x-backends/utils.ts','scripts/x-backends/static-http.ts','scripts/x-backends/browser-render.ts','scripts/x-backends/discovery-search.ts','scripts/x-backends/nitter-public.ts','scripts/x-backends/curated-live.ts','scripts/x-backends/fxtwitter.ts','scripts/x-backends/index.ts',
   'src/pages/index.astro','src/pages/issues/index.astro','src/pages/issues/latest.astro','src/pages/issues/[date].astro','src/pages/sources.astro','src/pages/topics.astro','src/pages/about.astro','src/pages/search.astro','src/components/Header.astro','src/components/WechatPopover.astro','src/components/ArticleCard.astro','src/layouts/BaseLayout.astro','src/styles/global.css'
 ];
 const expectedCrons = [
@@ -51,6 +51,8 @@ for (const phrase of [
   'X_ARTICLES_FETCH_LIVE',
   'X_ARTICLES_BROWSER_FETCH',
   'X_ARTICLES_FETCH_BACKENDS',
+  'nitter_public',
+  'NITTER_URL',
   'Install Playwright browsers',
   'npm run daily'
 ]) {
@@ -58,7 +60,7 @@ for (const phrase of [
 }
 
 const collect = await readText('scripts/collect-sources.ts');
-for (const phrase of ['runBackends','browser_render','discovery_search','curated_live','fxtwitter','history_fallback_used: false','mock_used: false']) {
+for (const phrase of ['runBackends','browser_render','discovery_search','nitter_public','curated_live','fxtwitter','history_fallback_used: false','mock_used: false']) {
   if (!collect.includes(phrase)) fail(`collect-sources missing phrase: ${phrase}`);
 }
 
@@ -134,7 +136,7 @@ if (currentRaw) {
 }
 
 const readme = await readText('README.md');
-for (const phrase of ['不使用付费 API','X paid API','合规边界','去重规则','公众号二维码','06:12','只收录 X Articles','shown-index.json','30 次','多后端','Playwright','第 30 次']) {
+for (const phrase of ['不使用付费 API','X paid API','合规边界','去重规则','公众号二维码','06:12','只收录 X Articles','shown-index.json','30 次','多后端','Playwright','Nitter','第 30 次']) {
   if (!readme.includes(phrase)) fail(`README missing phrase: ${phrase}`);
 }
 
