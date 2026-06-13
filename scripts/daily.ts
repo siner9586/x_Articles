@@ -8,8 +8,8 @@ const args = new Set(process.argv.slice(2));
 const dryRun = args.has('--dry-run');
 const force = args.has('--force') || process.env.X_ARTICLES_FORCE === 'true';
 const publishDate = process.env.ISSUE_DATE || beijingDate();
-const attemptIndex = Number(process.env.X_ARTICLES_ATTEMPT_INDEX || 1);
 const totalAttempts = Number(process.env.X_ARTICLES_TOTAL_ATTEMPTS || 30);
+const attemptIndex = Number(process.env.X_ARTICLES_ATTEMPT_INDEX || totalAttempts);
 const finalCompensation = process.env.X_ARTICLES_FINAL_COMPENSATION === 'true' || attemptIndex >= totalAttempts;
 
 function runStep(name: string, command: string, commandArgs: string[]) {
@@ -21,7 +21,7 @@ function runStep(name: string, command: string, commandArgs: string[]) {
       ISSUE_DATE: publishDate,
       TZ: 'Asia/Shanghai',
       X_ARTICLES_FETCH_LIVE: 'true',
-      X_ARTICLES_BROWSER_FETCH: process.env.X_ARTICLES_BROWSER_FETCH || 'true',
+      X_ARTICLES_BROWSER_FETCH: process.env.X_ARTICLES_BROWSER_FETCH || 'false',
       X_ARTICLES_FETCH_BACKENDS: process.env.X_ARTICLES_FETCH_BACKENDS || 'static_http,browser_render,discovery_search,nitter_public,curated_live,fxtwitter',
       X_ARTICLES_REQUIRE_LIVE_SELECTED: 'true',
       X_ARTICLES_PRODUCTION: 'true',
@@ -68,10 +68,10 @@ async function main() {
     return;
   }
 
-  runStep('Live multi-backend fetch X Articles', 'npx', ['tsx', 'scripts/collect-sources.ts']);
-  runStep('Score and rank current live candidates', 'npx', ['tsx', 'scripts/score-candidates.ts']);
-  runStep('Generate current issue from remaining new candidates only', 'npx', ['tsx', 'scripts/build-issue.ts']);
-  runStep('QA: verify no historical content reused', 'npx', ['tsx', 'scripts/qa.ts']);
+  runStep('Live multi-backend fetch X Articles', 'npm', ['run', 'collect']);
+  runStep('Score and rank current live candidates', 'npm', ['run', 'score']);
+  runStep('Generate current issue from remaining new candidates only', 'npm', ['run', 'build:issue']);
+  runStep('QA: verify no historical content reused', 'npm', ['run', 'qa']);
   runStep('Build site', 'npm', ['run', 'build']);
   console.log('\n[stage] Log result');
   console.log(`daily pipeline finished for ${publishDate}`);

@@ -9,8 +9,8 @@ import { attachArticleIdentity, isForbiddenPrimaryUrl, xArticleVerdict } from '.
 
 const issueDate = process.env.ISSUE_DATE || beijingDate();
 const allowed = new Set(['x_article']);
-const attemptIndex = Number(process.env.X_ARTICLES_ATTEMPT_INDEX || 1);
 const totalAttempts = Number(process.env.X_ARTICLES_TOTAL_ATTEMPTS || 30);
+const attemptIndex = Number(process.env.X_ARTICLES_ATTEMPT_INDEX || totalAttempts);
 const finalCompensation = process.env.X_ARTICLES_FINAL_COMPENSATION === 'true' || attemptIndex >= totalAttempts;
 
 async function sourceStats() {

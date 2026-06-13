@@ -7,7 +7,7 @@ sources:
     x_url: https://x.com/OpenAI
     priority: 100
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [model, product, safety, research]
     notes: Official company news and long-form updates.
   - name: Anthropic
@@ -18,7 +18,7 @@ sources:
     x_url: https://x.com/AnthropicAI
     priority: 100
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [claude, agents, safety, research]
     notes: Official news, engineering and research posts.
   - name: Google DeepMind
@@ -29,7 +29,7 @@ sources:
     x_url: https://x.com/GoogleDeepMind
     priority: 96
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [research, gemini, multimodal, science]
     notes: Research and product articles.
   - name: Google AI
@@ -40,7 +40,7 @@ sources:
     x_url: https://x.com/GoogleAI
     priority: 92
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [google, ai, product]
     notes: Google AI official updates.
   - name: Meta AI
@@ -51,7 +51,7 @@ sources:
     x_url: https://x.com/AIatMeta
     priority: 92
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [llama, open_source, research]
     notes: Meta AI blog and research/product articles.
   - name: xAI
@@ -62,7 +62,7 @@ sources:
     x_url: https://x.com/xai
     priority: 90
     crawl_mode: index_only
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [grok, model, product]
     notes: Official xAI updates. RSS availability may need manual confirmation.
   - name: Mistral AI
@@ -73,7 +73,7 @@ sources:
     x_url: https://x.com/MistralAI
     priority: 90
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [open_model, europe, model]
     notes: Company news and model release articles.
   - name: Cohere
@@ -84,7 +84,7 @@ sources:
     x_url: https://x.com/cohere
     priority: 86
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [enterprise, model, rag]
     notes: Enterprise AI and model articles.
   - name: Stability AI
@@ -95,7 +95,7 @@ sources:
     x_url: https://x.com/StabilityAI
     priority: 82
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [image, multimodal, model]
     notes: Official updates and model posts.
   - name: NVIDIA AI
@@ -106,7 +106,7 @@ sources:
     x_url: https://x.com/NVIDIAAI
     priority: 86
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [gpu, inference, infra]
     notes: NVIDIA AI blog and deep learning posts.
   - name: Perplexity
@@ -117,7 +117,7 @@ sources:
     x_url: https://x.com/perplexity_ai
     priority: 82
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [ai_search, product]
     notes: AI search product and company posts.
   - name: Cursor
@@ -128,7 +128,7 @@ sources:
     x_url: https://x.com/cursor_ai
     priority: 86
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [ai_coding, agent, developer_tools]
     notes: AI coding product posts and engineering notes.
   - name: Replit
@@ -139,7 +139,7 @@ sources:
     x_url: https://x.com/Replit
     priority: 80
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [ai_coding, agents, developer_tools]
     notes: Product and engineering posts.
   - name: Lovable
@@ -150,7 +150,7 @@ sources:
     x_url: https://x.com/lovable_dev
     priority: 78
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [ai_builder, product, startups]
     notes: AI app builder posts; RSS availability may need manual confirmation.
   - name: Vercel AI
@@ -162,7 +162,7 @@ sources:
     github_url: https://github.com/vercel/ai
     priority: 82
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [ai_sdk, frontend, agents]
     notes: AI SDK and developer platform articles.
   - name: GitHub Copilot
@@ -173,9 +173,9 @@ sources:
     x_url: https://x.com/GitHub
     priority: 84
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [ai_coding, copilot, repo_agent]
-    notes: Use only article posts, not repositories as selected items.
+    notes: Discovery/evidence only. Repositories and company blog posts are never selected primary cards.
   - name: Notion AI
     category: ai_application_company
     homepage_url: https://www.notion.com/product/ai
@@ -184,7 +184,7 @@ sources:
     x_url: https://x.com/NotionHQ
     priority: 72
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [productivity, ai_native_saas]
     notes: Product posts and workflow articles.
   - name: Canva AI
@@ -195,7 +195,7 @@ sources:
     x_url: https://x.com/canva
     priority: 70
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [design, multimodal, product]
     notes: AI product and newsroom articles.
   - name: Runway
@@ -206,7 +206,7 @@ sources:
     x_url: https://x.com/runwayml
     priority: 82
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [video, multimodal, research]
     notes: Research and product posts.
   - name: ElevenLabs
@@ -217,7 +217,7 @@ sources:
     x_url: https://x.com/elevenlabsio
     priority: 80
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [voice_ai, product]
     notes: Voice AI articles.
   - name: Midjourney
@@ -240,9 +240,9 @@ sources:
     github_url: https://github.com/huggingface
     priority: 90
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [open_source, models, papers]
-    notes: Blog articles can be selected; model/paper pages only evidence.
+    notes: Discovery/evidence only. Blog articles, model pages and paper pages are never selected primary cards.
   - name: LangChain
     category: ai_agent_framework
     homepage_url: https://www.langchain.com/
@@ -252,7 +252,7 @@ sources:
     github_url: https://github.com/langchain-ai/langchain
     priority: 84
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [agents, rag, tool_use]
     notes: Engineering articles and product architecture posts.
   - name: LlamaIndex
@@ -264,9 +264,9 @@ sources:
     github_url: https://github.com/run-llama/llama_index
     priority: 82
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [rag, agents, data]
-    notes: Blog articles selected; GitHub as evidence only.
+    notes: Discovery/evidence only. Blog articles and GitHub repositories are never selected primary cards.
   - name: Microsoft AI / AutoGen
     category: ai_agent_framework
     homepage_url: https://www.microsoft.com/en-us/ai
@@ -276,9 +276,9 @@ sources:
     github_url: https://github.com/microsoft/autogen
     priority: 82
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [agents, research, enterprise]
-    notes: Research blogs may be selected; repo only evidence.
+    notes: Discovery/evidence only. Research blogs and repositories are never selected primary cards.
   - name: CrewAI
     category: ai_agent_framework
     homepage_url: https://www.crewai.com/
@@ -288,9 +288,9 @@ sources:
     github_url: https://github.com/crewAIInc/crewAI
     priority: 76
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [agents, multi_agent]
-    notes: Blog articles selected; repo only evidence.
+    notes: Discovery/evidence only. Blog articles and repositories are never selected primary cards.
   - name: Browser Use
     category: ai_agent_framework
     homepage_url: https://browser-use.com/
@@ -300,9 +300,9 @@ sources:
     github_url: https://github.com/browser-use/browser-use
     priority: 76
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [browser_agent, tool_use]
-    notes: Blog articles selected; repository only evidence.
+    notes: Discovery/evidence only. Blog articles and repositories are never selected primary cards.
   - name: Windsurf / Codeium
     category: ai_coding_company
     homepage_url: https://windsurf.com/
@@ -311,6 +311,6 @@ sources:
     x_url: https://x.com/windsurf_ai
     priority: 82
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [ai_coding, developer_tools]
     notes: AI coding workflow articles.

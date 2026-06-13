@@ -36,7 +36,7 @@ export class NitterPublicBackend implements XArticleBackend {
     const targets: Array<{ url: string; source: any }> = [];
     for (const account of input.xAccounts.slice(0, input.maxAccounts)) {
       const handle = account.handle || '';
-      if (!handle || /TODO|needs_manual_confirmation/i.test(`${handle} ${account.verify_status || ''}`)) continue;
+      if (!handle || /TODO/i.test(`${handle} ${account.verify_status || ''}`)) continue;
       targets.push({ url: nitterUserUrl(base, handle), source: account });
     }
     for (const row of input.searchQueries.slice(0, input.maxSearchQueries)) {

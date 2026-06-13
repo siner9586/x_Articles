@@ -7,7 +7,7 @@ sources:
     x_url: https://x.com/Cloudflare
     priority: 80
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [edge, ai_infra, developers]
   - name: Cloudflare Developers
     category: infra_docs_blog
@@ -28,7 +28,7 @@ sources:
     github_url: https://github.com/supabase/supabase
     priority: 72
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [database, developers, ai_apps]
   - name: Neon Blog
     category: database_blog
@@ -38,7 +38,7 @@ sources:
     x_url: https://x.com/neondatabase
     priority: 70
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [postgres, serverless, ai_apps]
   - name: Modal Blog
     category: ai_infra_blog
@@ -48,7 +48,7 @@ sources:
     x_url: https://x.com/modal_labs
     priority: 76
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [compute, inference, ai_infra]
   - name: Together AI Blog
     category: ai_infra_blog
@@ -58,7 +58,7 @@ sources:
     x_url: https://x.com/togethercompute
     priority: 78
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [inference, open_source_model, ai_infra]
   - name: Fireworks AI Blog
     category: ai_infra_blog
@@ -68,7 +68,7 @@ sources:
     x_url: https://x.com/FireworksAI_HQ
     priority: 78
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [inference, model_serving, ai_infra]
   - name: Baseten Blog
     category: ai_infra_blog
@@ -78,7 +78,7 @@ sources:
     x_url: https://x.com/baseten
     priority: 74
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [deployment, inference, ai_infra]
   - name: Databricks Blog
     category: data_ai_blog
@@ -88,7 +88,7 @@ sources:
     x_url: https://x.com/databricks
     priority: 76
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [data, enterprise_ai, models]
   - name: Snowflake Blog
     category: data_ai_blog
@@ -98,7 +98,7 @@ sources:
     x_url: https://x.com/SnowflakeDB
     priority: 70
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [data, enterprise_ai]
   - name: MongoDB Blog
     category: database_blog
@@ -108,7 +108,7 @@ sources:
     x_url: https://x.com/MongoDB
     priority: 66
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [database, vector, rag]
   - name: Docker Blog
     category: developer_infra_blog
@@ -138,7 +138,7 @@ sources:
     x_url: https://x.com/awscloud
     priority: 76
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [cloud, enterprise_ai, mlops]
   - name: Google Cloud AI Blog
     category: cloud_ai_blog
@@ -148,7 +148,7 @@ sources:
     x_url: https://x.com/googlecloud
     priority: 76
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [cloud, gemini, enterprise_ai]
   - name: Azure AI Blog
     category: cloud_ai_blog
@@ -158,5 +158,5 @@ sources:
     x_url: https://x.com/Azure
     priority: 76
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [cloud, enterprise_ai, agents]

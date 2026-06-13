@@ -1,5 +1,3 @@
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
 import type { ArticleDiscoveryResult, DiscoveryInput, XArticleBackend } from './types.js';
 import { extractXArticleUrls, makeDiscoveryResult, xSeedUrls } from './utils.js';
 
@@ -23,7 +21,16 @@ export class BrowserRenderBackend implements XArticleBackend {
   name = 'browser_render' as const;
 
   async discover(input: DiscoveryInput): Promise<ArticleDiscoveryResult[]> {
-    if (process.env.X_ARTICLES_BROWSER_FETCH === 'false') return [];
+    if (process.env.X_ARTICLES_BROWSER_FETCH !== 'true') return [{
+      url: 'browser_render_disabled',
+      canonical_url: 'browser_render_disabled',
+      discovered_at: input.capturedAt,
+      fetched_at: input.capturedAt,
+      backend: this.name,
+      source_url: 'browser_render',
+      fetch_status: 'skipped',
+      fetch_error: 'X_ARTICLES_BROWSER_FETCH is not true; optional browser discovery backend skipped'
+    }];
     let chromium: any;
     try {
       chromium = (await import('playwright')).chromium;
@@ -48,26 +55,28 @@ export class BrowserRenderBackend implements XArticleBackend {
     });
     await maybeInstallCookies(context);
     const page = await context.newPage();
-    page.setDefaultTimeout(12000);
+    page.setDefaultTimeout(Number(process.env.X_ARTICLES_BROWSER_TIMEOUT_MS || 9000));
 
     try {
-      await fs.mkdir('data/raw/browser-snapshots', { recursive: true });
+      const debugSnapshots = process.env.X_ARTICLES_DEBUG_SNAPSHOTS === 'true';
       const accounts = input.xAccounts.slice(0, Math.min(input.maxAccounts, 80));
+      const urlsPerAccount = Number(process.env.X_ARTICLES_BROWSER_URLS_PER_ACCOUNT || 2);
+      const maxPages = Number(process.env.X_ARTICLES_BROWSER_MAX_PAGES || 24);
       const globalSearches = input.searchQueries.slice(0, Math.min(input.maxSearchQueries, 30)).map(q =>
         `https://x.com/search?q=${encodeURIComponent(q.query || q.q || '')}&src=typed_query&f=live`
       );
       const visitQueue: Array<{ url: string; source: any }> = [];
       for (const account of accounts) {
-        if (!account?.x_url || /TODO|needs_manual_confirmation/i.test(`${account.handle || ''} ${account.verify_status || ''}`)) continue;
-        for (const url of xSeedUrls(account)) visitQueue.push({ url, source: account });
+        if (!account?.x_url || /TODO/i.test(`${account.handle || ''} ${account.verify_status || ''}`)) continue;
+        for (const url of xSeedUrls(account).slice(0, urlsPerAccount)) visitQueue.push({ url, source: account });
       }
       for (const url of globalSearches) visitQueue.push({ url, source: { display_name: 'Global X Article search', priority: 76, tags: ['x_article_search'] } });
 
       let snapshotIndex = 0;
-      for (const entry of visitQueue.slice(0, 180)) {
+      for (const entry of visitQueue.slice(0, maxPages)) {
         try {
-          await page.goto(entry.url, { waitUntil: 'domcontentloaded', timeout: 18000 });
-          await page.waitForTimeout(2200);
+          await page.goto(entry.url, { waitUntil: 'domcontentloaded', timeout: Number(process.env.X_ARTICLES_BROWSER_GOTO_TIMEOUT_MS || 7000) });
+          await page.waitForTimeout(Number(process.env.X_ARTICLES_BROWSER_SETTLE_MS || 600));
           const html = await page.content();
           const wall = looksBlocked(html);
           if (wall) {
@@ -86,7 +95,10 @@ export class BrowserRenderBackend implements XArticleBackend {
           }
           const bodyText = await page.locator('body').innerText({ timeout: 2500 }).catch(() => '');
           const combined = `${html}\n${bodyText}`;
-          if (snapshotIndex < 20) {
+          if (debugSnapshots && snapshotIndex < 20) {
+            const fs = await import('node:fs/promises');
+            const path = await import('node:path');
+            await fs.mkdir('data/raw/browser-snapshots', { recursive: true });
             const safeName = `${input.issueDate}-${String(++snapshotIndex).padStart(2, '0')}.html`;
             await fs.writeFile(path.join('data/raw/browser-snapshots', safeName), combined.slice(0, 120000), 'utf8');
           }

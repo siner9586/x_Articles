@@ -14,8 +14,8 @@ const issueDate = process.env.ISSUE_DATE || beijingDate();
 const capturedAt = beijingISOString();
 const fetchBatchId = process.env.GITHUB_RUN_ID || process.env.X_ARTICLES_FETCH_BATCH_ID || sha1(`${issueDate}|${capturedAt}`);
 const liveFetch = process.env.X_ARTICLES_FETCH_LIVE !== 'false';
-const attemptIndex = Number(process.env.X_ARTICLES_ATTEMPT_INDEX || 1);
 const totalAttempts = Number(process.env.X_ARTICLES_TOTAL_ATTEMPTS || 30);
+const attemptIndex = Number(process.env.X_ARTICLES_ATTEMPT_INDEX || totalAttempts);
 const finalCompensation = process.env.X_ARTICLES_FINAL_COMPENSATION === 'true' || attemptIndex >= totalAttempts;
 
 const queryRaw = parse(await readText('data/sources/query_templates.yaml', '{}')) || {};

@@ -8,7 +8,7 @@ sources:
     podcast_url: https://a16z.com/podcasts/
     priority: 88
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [vc, ai_investment, thesis]
   - name: Sequoia
     category: vc_trend_source
@@ -19,7 +19,7 @@ sources:
     podcast_url: https://www.sequoiacap.com/podcast/training-data/
     priority: 86
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [vc, startups, ai_investment]
   - name: Y Combinator
     category: startup_source
@@ -30,7 +30,7 @@ sources:
     podcast_url: https://www.youtube.com/@ycombinator
     priority: 84
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [startups, product, ai_startup]
   - name: South Park Commons
     category: vc_trend_source
@@ -41,7 +41,7 @@ sources:
     podcast_url: https://www.southparkcommons.com/minus-one
     priority: 78
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [founders, ai_startup]
   - name: Redpoint
     category: vc_trend_source
@@ -52,7 +52,7 @@ sources:
     podcast_url: https://www.redpoint.com/podcast/
     priority: 78
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [vc, ai_investment]
   - name: Bessemer Venture Partners
     category: vc_trend_source
@@ -62,7 +62,7 @@ sources:
     x_url: https://x.com/BessemerVP
     priority: 76
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [cloud, ai_saas, vc]
   - name: Greylock
     category: vc_trend_source
@@ -72,7 +72,7 @@ sources:
     x_url: https://x.com/GreylockVC
     priority: 76
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [vc, enterprise_ai]
   - name: Lightspeed
     category: vc_trend_source
@@ -82,7 +82,7 @@ sources:
     x_url: https://x.com/lightspeedvp
     priority: 74
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [vc, startups]
   - name: Index Ventures
     category: vc_trend_source
@@ -92,7 +92,7 @@ sources:
     x_url: https://x.com/indexventures
     priority: 74
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [vc, startups]
   - name: Benchmark
     category: vc_trend_source
@@ -112,5 +112,5 @@ sources:
     x_url: https://x.com/firstround
     priority: 82
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [startup, playbook, product]

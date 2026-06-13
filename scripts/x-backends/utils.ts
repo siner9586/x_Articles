@@ -82,9 +82,10 @@ export function xSeedUrls(account: any): string[] {
   if (handle) urls.push(`https://x.com/${handle}/articles`);
   if (xUrl) urls.push(xUrl);
   if (handle) {
+    urls.push(`https://x.com/search?q=from%3A${encodeURIComponent(handle)}%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live`);
+    urls.push(`https://x.com/search?q=from%3A${encodeURIComponent(handle)}%20filter%3Alinks%20article&src=typed_query&f=live`);
     urls.push(`https://x.com/search?q=from%3A${encodeURIComponent(handle)}%20%22%2Farticle%2F%22&src=typed_query&f=live`);
     urls.push(`https://x.com/search?q=from%3A${encodeURIComponent(handle)}%20%22%2Farticles%2F%22&src=typed_query&f=live`);
-    urls.push(`https://x.com/search?q=from%3A${encodeURIComponent(handle)}%20%22x.com%2Fi%2Farticle%22&src=typed_query&f=live`);
   }
   return unique(urls);
 }

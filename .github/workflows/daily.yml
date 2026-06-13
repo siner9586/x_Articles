@@ -141,7 +141,7 @@ jobs:
 
       - name: Install
         if: steps.preflight.outputs.skip != 'true'
-        run: npm install
+        run: npm ci
 
       - name: Install Playwright browsers
         if: steps.preflight.outputs.skip != 'true'
@@ -160,6 +160,15 @@ jobs:
           X_ARTICLES_MAX_ACCOUNTS: '80'
           X_ARTICLES_MAX_SEARCH_QUERIES: '30'
           X_ARTICLES_MAX_CANDIDATES: '200'
+          X_ARTICLES_URLS_PER_ACCOUNT: '3'
+          X_ARTICLES_STATIC_HTTP_CONCURRENCY: '16'
+          X_ARTICLES_STATIC_HTTP_TIMEOUT_MS: '3200'
+          X_ARTICLES_BROWSER_URLS_PER_ACCOUNT: '2'
+          X_ARTICLES_BROWSER_MAX_PAGES: '24'
+          X_ARTICLES_BROWSER_GOTO_TIMEOUT_MS: '7000'
+          X_ARTICLES_BROWSER_SETTLE_MS: '600'
+          X_ARTICLES_SEARCH_CONCURRENCY: '8'
+          X_ARTICLES_SEARCH_TIMEOUT_MS: '3500'
           X_ARTICLES_MIN_SELECTED: '6'
           X_ARTICLES_ALLOW_EMPTY_ISSUE: 'true'
           X_ARTICLES_ATTEMPT_INDEX: ${{ steps.preflight.outputs.attempt_index }}

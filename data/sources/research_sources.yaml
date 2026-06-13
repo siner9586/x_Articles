@@ -80,7 +80,7 @@ sources:
     x_url: https://x.com/GoogleAI
     priority: 84
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [research, google, ai]
   - name: Microsoft Research Blog
     category: research_blog_article
@@ -90,7 +90,7 @@ sources:
     x_url: https://x.com/MSFTResearch
     priority: 82
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [research, microsoft, ai]
   - name: Meta Research
     category: research_blog_article
@@ -100,7 +100,7 @@ sources:
     x_url: https://x.com/AIatMeta
     priority: 80
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [research, meta, ai]
   - name: Stanford HAI
     category: research_institute_article
@@ -110,7 +110,7 @@ sources:
     x_url: https://x.com/StanfordHAI
     priority: 78
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [research, policy, ai]
   - name: Berkeley BAIR
     category: research_blog_article
@@ -120,7 +120,7 @@ sources:
     x_url: https://x.com/berkeley_ai
     priority: 78
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [research, robotics, agents]
   - name: MIT CSAIL
     category: research_institute_article
@@ -130,7 +130,7 @@ sources:
     x_url: https://x.com/MIT_CSAIL
     priority: 76
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [research, mit, ai]
   - name: CMU AI
     category: research_institute_article
@@ -140,7 +140,7 @@ sources:
     x_url: https://x.com/SCSatCMU
     priority: 74
     crawl_mode: rss_then_index
-    use_as: primary_article_source
+    use_as: discovery_source
     tags: [research, cmu, ai]
   - name: GitHub Trending
     category: technical_discovery

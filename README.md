@@ -10,7 +10,7 @@ Daily curated high-quality **X Articles only** signal site, built as a static si
 
 ## 2. 项目定位：只收录 X Articles
 
-selected 主卡片只允许 `x_article`，并且必须同时满足：
+selected 主卡片只允许 x_article。selected 主卡片只允许 `x_article`，并且必须同时满足：
 
 - `content_type === 'x_article'`
 - `source_platform === 'x'`
@@ -324,7 +324,9 @@ public/assets/wechat-qrcode.svg
 
 ## 17. 部署说明
 
-Cloudflare Pages / Netlify：
+Cloudflare Pages 是主部署链路，GitHub Actions 成功 push 到 `main` 后由 Cloudflare Pages 自动构建静态站点。GitHub Pages workflow 仅保留手动触发用于临时校验，不参与主链路。
+
+Cloudflare Pages：
 
 - Build command: `npm run build`
 - Output directory: `dist`

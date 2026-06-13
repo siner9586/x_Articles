@@ -27,14 +27,14 @@ const sections = [
         <div class="stat"><strong>{issue?.metadata?.selected_count || 0}</strong><span>selected today</span></div>
         <div class="stat"><strong>{issue?.metadata?.duplicates_blocked || 0}</strong><span>duplicates blocked</span></div>
         <div class="stat"><strong>{issue?.metadata?.fetch_failures || 0}</strong><span>fetch failures</span></div>
-        <div class="stat"><strong>06:12</strong><span>BJT first run</span></div>
+        <div class="stat"><strong>{issue?.metadata?.timezone || 'Asia/Shanghai'}</strong><span>issue timezone</span></div>
       </div>
     </aside>
   </div>
 </section>
 <section class="section">
   <div class="container">
-    {issue?.metadata?.selected_count === 0 && <div class="notice">本期没有展示条目：当日 live fetch 无合格新 X Article 时，系统不会使用历史内容、mock、fixture 或外部文章补齐。</div>}
+    {issue?.metadata?.selected_count === 0 && <div class="notice">无合格新增 X Articles。本期没有展示条目：当日 live fetch 无合格新 X Article 时，系统不会使用历史内容、mock、fixture 或外部文章补齐。</div>}
     <div class="grid" style="margin-top:18px">
       <div class="panel"><h3>本期主要趋势</h3>{(issue?.summary?.main_trends || []).map((t) => <p>{t}</p>)}</div>
       <div class="panel"><h3>本期值得追踪方向</h3>{(issue?.summary?.what_to_watch || []).map((t) => <p>{t}</p>)}</div>

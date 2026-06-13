@@ -6,6 +6,7 @@ import { DiscoverySearchBackend } from './discovery-search.js';
 import { CuratedLiveBackend } from './curated-live.js';
 import { FxTwitterBackend } from './fxtwitter.js';
 import { NitterPublicBackend } from './nitter-public.js';
+import { isXArticleUrl } from '../x-article.js';
 
 function emptyStat(): BackendStat {
   return { attempted: 0, ok: 0, partial: 0, failed: 0, skipped: 0, article_urls_found: 0 };
@@ -58,7 +59,7 @@ export async function runBackends(input: DiscoveryInput): Promise<{
     try {
       const out = await backend.discover(input);
       backend_stats[name].attempted += 1;
-      backend_stats[name].article_urls_found += out.filter(item => /^https:\/\/x\.com\//.test(item.canonical_url || '')).length;
+      backend_stats[name].article_urls_found += out.filter(item => isXArticleUrl(item.canonical_url || item.url || '')).length;
       for (const item of out) {
         if (item.fetch_status === 'failed') backend_stats[name].failed += 1;
         else if (item.fetch_status === 'partial') backend_stats[name].partial += 1;

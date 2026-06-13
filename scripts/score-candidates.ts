@@ -97,7 +97,7 @@ function weighted(c: Candidate, text: string) {
   c.heat_score = heat;
   c.freshness_score = fresh;
   c.article_confidence_score = confidence;
-  c.score = clamp(quality * 0.30 + heat * 0.20 + fresh * 0.20 + source * 0.15 + confidence * 0.15 - penalty);
+  c.score = clamp(quality * 0.40 + heat * 0.10 + fresh * 0.20 + source * 0.15 + confidence * 0.15 - penalty);
   return c.score;
 }
 
