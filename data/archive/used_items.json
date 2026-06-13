@@ -46,5 +46,37 @@
     "issue_date": "2026-06-11",
     "source_file": "data/issues/2026-06-11.json",
     "used_as": "shown"
+  },
+  {
+    "canonical_url": "https://x.com/i/article/2061552855396548608",
+    "normalized_url": "https://x.com/i/article/2061552855396548608",
+    "article_id": "2061552855396548608",
+    "url_hash": "8c018565b2f40b3c",
+    "content_hash": "a4d51add73ec6ff9",
+    "title_hash": "51a94069cdb1359a",
+    "author_title_hash": "799876491f4d7e70",
+    "near_title_hash": "3d07ddeb94ce2070",
+    "near_content_hash": "4f6492cc34af8c24",
+    "title": "First Round (@firstround) on X",
+    "author": "First Round Review",
+    "issue_date": "2026-06-13",
+    "source_file": "data/issues/2026-06-13.json",
+    "used_as": "shown"
+  },
+  {
+    "canonical_url": "https://x.com/i/article/2037041238030114819",
+    "normalized_url": "https://x.com/i/article/2037041238030114819",
+    "article_id": "2037041238030114819",
+    "url_hash": "1c402c23eb2932b9",
+    "content_hash": "1c97bac9af1588bf",
+    "title_hash": "a5b7631f1415292a",
+    "author_title_hash": "e00c162b5196b116",
+    "near_title_hash": "276cdd8b25ad76e9",
+    "near_content_hash": "715a85e6c6b19fc0",
+    "title": "Hamel Husain (@HamelHusain) on X",
+    "author": "Hamel Husain",
+    "issue_date": "2026-06-13",
+    "source_file": "data/issues/2026-06-13.json",
+    "used_as": "shown"
   }
 ]
