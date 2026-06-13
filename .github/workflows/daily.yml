@@ -184,7 +184,7 @@ jobs:
           if [[ -n "$(git status --porcelain)" ]]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add data content public/index-data package-lock.json
+            git add data content public/index-data dist package-lock.json
             git commit -m "chore: update x articles for ${DATE}"
             git push
           else
