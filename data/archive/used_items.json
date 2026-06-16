@@ -78,5 +78,21 @@
     "issue_date": "2026-06-13",
     "source_file": "data/issues/2026-06-13.json",
     "used_as": "shown"
+  },
+  {
+    "canonical_url": "https://x.com/i/article/2066585902084669440",
+    "normalized_url": "https://x.com/i/article/2066585902084669440",
+    "article_id": "2066585902084669440",
+    "url_hash": "93176edc53c579c1",
+    "content_hash": "7f5236b2aabe6a63",
+    "title_hash": "8283d07347cc6f77",
+    "author_title_hash": "0b10224ffa8ec665",
+    "near_title_hash": "f64437e589ffd74a",
+    "near_content_hash": "b5723e86bb9539a6",
+    "title": "Cohere (@cohere) on X",
+    "author": "Cohere",
+    "issue_date": "2026-06-16",
+    "source_file": "data/issues/2026-06-16.json",
+    "used_as": "shown"
   }
 ]
