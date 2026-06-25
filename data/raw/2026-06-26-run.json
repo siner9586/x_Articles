@@ -1,0 +1,119 @@
+{
+  "issue_date": "2026-06-26",
+  "captured_at": "2026-06-26T07:48:54+08:00",
+  "attempt_index": 30,
+  "total_attempts": 30,
+  "final_compensation": true,
+  "sources_scanned": 482,
+  "live_sources_scanned": 19,
+  "candidates_count": 15,
+  "selected_count": 0,
+  "fetch_failures": 4,
+  "errors": [
+    {
+      "backend": "static_http",
+      "phase": "discover",
+      "source": "https://x.com/clem_delangue",
+      "error": "HTTP 404"
+    },
+    {
+      "backend": "static_http",
+      "phase": "discover",
+      "source": "https://x.com/LangChainAI",
+      "error": "HTTP 404"
+    },
+    {
+      "backend": "static_http",
+      "phase": "discover",
+      "source": "https://x.com/logan_kilpatrick",
+      "error": "HTTP 404"
+    },
+    {
+      "backend": "browser_render",
+      "phase": "discover",
+      "source": "https://x.com/sama",
+      "error": "login_or_verification_wall"
+    }
+  ],
+  "live_fetch": true,
+  "fetch_batch_id": "28207751138",
+  "backends_enabled": [
+    "static_http",
+    "browser_render",
+    "discovery_search",
+    "nitter_public",
+    "curated_live",
+    "fxtwitter"
+  ],
+  "backend_stats": {
+    "static_http": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 13,
+      "failed": 3,
+      "skipped": 0,
+      "article_urls_found": 13
+    },
+    "browser_render": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 3,
+      "failed": 1,
+      "skipped": 0,
+      "article_urls_found": 3
+    },
+    "discovery_search": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 3,
+      "failed": 0,
+      "skipped": 0,
+      "article_urls_found": 3
+    },
+    "nitter_public": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 0,
+      "failed": 0,
+      "skipped": 1,
+      "article_urls_found": 0
+    },
+    "curated_live": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 0,
+      "failed": 0,
+      "skipped": 0,
+      "article_urls_found": 0
+    },
+    "fxtwitter": {
+      "attempted": 1,
+      "ok": 0,
+      "partial": 0,
+      "failed": 0,
+      "skipped": 0,
+      "article_urls_found": 0
+    }
+  },
+  "candidate_source_policy": "current live fetch only; history is not read by collect-sources",
+  "x_sources_attempted": 482,
+  "curated_x_candidates": 0,
+  "search_queries_attempted": 12,
+  "x_article_urls_found": 19,
+  "discovery_sources_attempted": 6,
+  "discovery_sources_scanned": 19,
+  "duplicates_blocked": 0,
+  "non_x_blocked": 0,
+  "non_article_blocked": 0,
+  "history_fallback_used": false,
+  "mock_used": false,
+  "empty_issue_generated": true,
+  "empty_reason": "no_qualified_new_x_articles",
+  "selected_policy": "x_article_only",
+  "compliance": "X Articles only. No paid API, no X paid API, no login-wall bypass, no CAPTCHA bypass, no Cloudflare bypass, no paywall circumvention, no full copyrighted article body storage.",
+  "generation_status": "empty_issue_generated_final_compensation",
+  "history_entries_used_for_dedupe_only": 6,
+  "duplicate_candidates_blocked": 8,
+  "non_live_blocked": 0,
+  "forbidden_blocked": 0
+}
