@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { articles } from '../../lib/mock-data';
+import { generateDailyReport } from '../../lib/reports';
+import { rankArticles } from '../../lib/scoring';
+const report = generateDailyReport(articles, '2026-07-02');
+const top = rankArticles(articles, 'bookmarks').slice(0, 10);
+---
+<BaseLayout title="第一期 | X Articles 高收藏学习精选">
+  <section class="hero">
+    <div class="container hero-card">
+      <span class="eyebrow">Issue 01 · 2026-07-02</span>
+      <h1>今日 X Articles 高收藏学习精选</h1>
+      <p>{report.summary}</p>
+      <p class="warning">说明：本期为 mock/manual seed 首期样例，用于验证站点结构、榜单、摘要、详情页与报告输出。当前会话未暴露 X MCP 连接器，因此未调用真实 X MCP。接入官方 X MCP 后，本页可由真实 X Articles 数据替换。</p>
+      <div class="actions">
+        <a class="button primary" href="/api/reports/daily">查看报告 JSON</a>
+        <a class="button" href="/reports/">复制 Markdown</a>
+      </div>
+    </div>
+  </section>
+  <section class="container layout">
+    <div>
+      <div class="panel" style="margin-bottom:16px">
+        <h2>Top 10 高收藏 Articles</h2>
+        <p>排序：bookmark_count DESC。每篇均保留作者归属、发布时间、公开指标与原文链接。</p>
+      </div>
+      <div class="article-list">
+        {top.map((article, index) => <ArticleCard article={article} rank={index + 1} />)}
+      </div>
+    </div>
+    <aside class="panel">
+      <h2>本期学习地图</h2>
+      <ul class="learn-map">
+        {report.topics.map(topic => <li>{topic}</li>)}
+      </ul>
+      <h2>值得深挖的问题</h2>
+      <ul>
+        {report.questions.map(question => <li>{question}</li>)}
+      </ul>
+    </aside>
+  </section>
+</BaseLayout>
