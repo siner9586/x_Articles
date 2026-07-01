@@ -3,7 +3,7 @@ import { rankArticles } from './scoring';
 import { topicName } from './topics';
 import type { XArticle } from './types';
 
-export function generateDailyReport(input: XArticle[] = articles, date = '2026-07-02') {
+export function generateIssueReport(input: XArticle[] = articles, date = '2026-07-02') {
   const ranked = rankArticles(input, 'bookmarks');
   const highBookmarkCount = ranked.filter(item => item.metrics.bookmark_count >= 100).length;
   const topics = [...new Set(ranked.map(item => topicName(item.topic_id)))].slice(0, 6);
