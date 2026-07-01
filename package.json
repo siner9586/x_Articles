@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler pages dev dist --compatibility-date=2026-07-02 -- npm run build",
+    "dev": "npm run build && wrangler pages dev dist --compatibility-date=2026-07-02",
     "dev:ui": "astro dev",
     "build": "astro build",
     "preview": "npm run build && wrangler pages dev dist --compatibility-date=2026-07-02",
