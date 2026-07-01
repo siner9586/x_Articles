@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { generateDailyReport } from '../../lib/reports';
-const firstIssue = generateDailyReport();
+import { generateIssueReport } from '../../lib/reports';
+const firstIssue = generateIssueReport();
 ---
 <BaseLayout title="Issues | X Articles Intelligence">
   <section class="hero">
@@ -25,7 +25,7 @@ const firstIssue = generateDailyReport();
           </div>
           <div class="actions">
             <a class="button primary" href="/issues/2026-07-02/">打开第一期</a>
-            <a class="button" href="/api/reports/daily">查看 JSON</a>
+            <a class="button" href="/api/reports/issue">查看 JSON</a>
           </div>
         </div>
       </div>
