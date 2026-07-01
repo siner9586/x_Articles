@@ -7,6 +7,6 @@ const report = generateDailyReport();
   <section class="hero"><div class="container hero-card"><span class="eyebrow">报告 / 期刊</span><h1>{report.title}</h1><p>{report.summary}</p></div></section>
   <section class="container layout">
     <div class="panel"><h2>Markdown 报告</h2><pre class="markdown-box">{report.markdown}</pre></div>
-    <aside class="panel"><h2>报告入口</h2><p>API: <code>/api/reports/daily</code>（兼容路径，前端不使用 Daily 命名）</p><p>生成报告需要 POST <code>/api/reports/generate</code> 并携带 ADMIN_TOKEN。</p><div class="actions"><a class="button primary" href="/api/reports/daily">查看 JSON</a></div></aside>
+    <aside class="panel"><h2>报告入口</h2><p>API: <code>/api/reports/issue</code></p><p>生成报告需要 POST <code>/api/reports/generate</code> 并携带 ADMIN_TOKEN。</p><div class="actions"><a class="button primary" href="/api/reports/issue">查看 JSON</a></div></aside>
   </section>
 </BaseLayout>
