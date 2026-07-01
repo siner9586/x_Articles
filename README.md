@@ -52,10 +52,12 @@ The previous non-official page discovery and browser-rendering pipeline has been
 
 ## Product pages
 
-- `/` — Dashboard: high-bookmark Articles, today metrics, top domains and recent report.
+- `/` — Dashboard: high-bookmark Articles, issue metrics, top domains and recent report.
 - `/articles/` — Ranking page: time, topic, language, sorting and minimum metric filters.
 - `/articles/:id/` — Static detail page for demo data, including summary, learning value, recommended use and limitations.
-- `/reports/` — Daily report view and Markdown copy area.
+- `/issues/` — Issue archive.
+- `/issues/2026-07-02/` — First issue sample.
+- `/reports/` — Report view and Markdown copy area.
 - `/topics/` — Read-only topic configuration.
 - `/compliance/` — Compliance statement.
 
@@ -69,7 +71,7 @@ Cloudflare Pages Functions expose:
 - `POST /api/collect`
 - `POST /api/refresh-metrics`
 - `POST /api/summarize`
-- `GET /api/reports/daily`
+- `GET /api/reports/issue`
 - `POST /api/reports/generate`
 
 All write routes require `ADMIN_TOKEN` in one of these forms:
@@ -122,10 +124,13 @@ Then open:
 
 ```text
 http://localhost:8788/
+http://localhost:8788/issues/
+http://localhost:8788/issues/2026-07-02/
 http://localhost:8788/api/health
 http://localhost:8788/api/articles?sort=bookmarks
 http://localhost:8788/api/articles?sort=likes
 http://localhost:8788/api/articles?sort=score
+http://localhost:8788/api/reports/issue
 ```
 
 ## Database initialization
@@ -179,6 +184,7 @@ wrangler d1 migrations apply x_articles --remote
 ```bash
 curl https://<your-site>/api/health
 curl "https://<your-site>/api/articles?sort=bookmarks&limit=10"
+curl https://<your-site>/api/reports/issue
 ```
 
 ## Official X MCP / X API configuration
