@@ -1,11 +1,9 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "allowJs": true,
-    "moduleResolution": "Bundler",
-    "types": ["node"],
-    "strict": false,
-    "skipLibCheck": true
+    "types": ["@cloudflare/workers-types", "node"],
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["src", "scripts", "astro.config.mjs"]
+  "include": ["src", "scripts", "functions", "config"]
 }

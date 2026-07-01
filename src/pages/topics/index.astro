@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { topics } from '../../lib/topics';
+---
+<BaseLayout title="Topics | X Articles Intelligence">
+  <section class="hero"><div class="container hero-card"><span class="eyebrow">Settings / Topics</span><h1>多主题配置</h1><p>MVP 只读展示 <code>config/topics.json</code>。不同主题允许不同收藏与点赞阈值。</p></div></section>
+  <section class="container topic-grid">
+    {topics.map(topic => <article class="topic-card"><h3>{topic.name}</h3><p>{topic.description}</p><div class="pills"><span class="pill">min bookmarks {topic.min_bookmarks}</span><span class="pill">min likes {topic.min_likes}</span>{topic.languages.map(lang => <span class="pill">{lang}</span>)}</div><p><strong>Keywords:</strong> {topic.keywords.join(', ')}</p></article>)}
+  </section>
+</BaseLayout>

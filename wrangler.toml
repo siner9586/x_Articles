@@ -1,0 +1,17 @@
+name = "x-articles-intelligence"
+compatibility_date = "2026-07-02"
+pages_build_output_dir = "dist"
+
+[vars]
+AI_PROVIDER = "mock"
+AI_MODEL = "gpt-4.1-mini"
+X_MCP_URL = "https://api.x.com/mcp"
+X_DOCS_MCP_URL = "https://docs.x.com/mcp"
+LOG_LEVEL = "info"
+MAX_ARTICLES_PER_RUN = "100"
+MAX_AI_SUMMARIES_PER_RUN = "20"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "x_articles"
+database_id = "replace-with-cloudflare-d1-database-id"

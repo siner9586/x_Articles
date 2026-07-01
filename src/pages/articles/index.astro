@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { articles } from '../../lib/mock-data';
+import { rankArticles } from '../../lib/scoring';
+import { topics } from '../../lib/topics';
+const ranked = rankArticles(articles, 'bookmarks');
+---
+<BaseLayout title="Articles Ranking | X Articles Intelligence">
+  <section class="hero"><div class="container hero-card"><span class="eyebrow">排行榜</span><h1>Articles Ranking</h1><p>前端提供筛选器 UI；生产查询可使用 `/api/articles?sort=bookmarks|likes|score|growth|niche`。</p></div></section>
+  <section class="container">
+    <form class="filters" onsubmit="return false">
+      <label>时间<select><option>24h</option><option>7d</option><option>30d</option><option>all</option></select></label>
+      <label>领域<select><option>全部</option>{topics.map(t => <option>{t.name}</option>)}</select></label>
+      <label>语言<select><option>全部</option><option>英文</option><option>中文</option><option>日文</option></select></label>
+      <label>排序<select><option>收藏数</option><option>点赞数</option><option>综合分</option><option>收藏增长</option><option>小众高质量</option></select></label>
+      <label>最低收藏数<input type="number" value="0" /></label>
+    </form>
+    <div class="article-list">{ranked.map((article, index) => <ArticleCard article={article} rank={index + 1} />)}</div>
+  </section>
+</BaseLayout>

@@ -1,92 +1,37 @@
-import assert from 'node:assert/strict';
-import { duplicateReason } from './history-index.js';
-import {
-  attachArticleIdentity,
-  canonicalizeUrl,
-  extractXArticleId,
-  isForbiddenPrimaryUrl,
-  isXArticleUrl,
-  xArticleVerdict
-} from './x-article.js';
+import { readFileSync } from 'node:fs';
+import { articles } from '../src/lib/mock-data';
+import { computeArticleScore, filterArticles, rankArticles } from '../src/lib/scoring';
+import { topics } from '../src/lib/topics';
 
-function testXArticleRules() {
-  const allowed = [
-    'https://x.com/i/article/1234567890',
-    'https://x.com/i/articles/1234567890',
-    'https://x.com/alice/article/abc123',
-    'https://x.com/alice/articles/abc123',
-    'https://twitter.com/i/article/1234567890',
-    'https://twitter.com/i/articles/1234567890',
-    'https://twitter.com/alice/article/abc123',
-    'https://twitter.com/alice/articles/abc123',
-    'https://mobile.x.com/alice/articles/abc123'
-  ];
-  for (const url of allowed) assert.equal(isXArticleUrl(url), true, `allowed article URL rejected: ${url}`);
-  const a = 'https://twitter.com/alice/articles/abc123?utm_source=newsletter&ref=foo';
-  assert.equal(canonicalizeUrl(a), 'https://x.com/alice/articles/abc123');
-  assert.equal(isXArticleUrl(a), true);
-  assert.equal(extractXArticleId(a), 'alice/abc123');
-
-  const blocked = [
-    'https://x.com/compose/articles',
-    'https://x.com/alice/status/123',
-    'https://x.com/alice',
-    'https://x.com/search?q=ai',
-    'https://x.com/i/bookmarks',
-    'https://x.com/i/lists/123',
-    'https://x.com/i/status/123'
-  ];
-  for (const url of blocked) assert.equal(isXArticleUrl(url), false, `blocked URL accepted: ${url}`);
-  assert.equal(isForbiddenPrimaryUrl('https://youtube.com/watch?v=x'), true);
-  assert.equal(isForbiddenPrimaryUrl('https://x.com/alice/status/123'), true);
+function assert(condition: unknown, message: string) {
+  if (!condition) throw new Error(message);
 }
 
-function testVerdict() {
-  const item = {
-    canonical_url: 'https://x.com/alice/articles/abc123',
-    content_type: 'x_article',
-    source_platform: 'x',
-    source_type: 'x_article',
-    title: 'How we built a reliable AI coding workflow',
-    author: 'Alice'
-  };
-  assert.equal(xArticleVerdict(item).ok, true);
-  assert.equal(xArticleVerdict({ ...item, content_type: 'external_article' }).ok, false);
-  assert.equal(xArticleVerdict({ ...item, canonical_url: 'https://x.com/alice/status/123' }).ok, false);
-}
+assert(topics.length >= 12, 'topics config should include at least 12 topics');
+assert(topics.every(t => t.id && t.keywords.length && t.languages.length && t.enabled), 'topics should be enabled and complete');
+assert(articles.length >= 20, 'mock data should include at least 20 articles');
+assert(articles.every(a => /\/articles?\//.test(a.url) && a.author_username && a.created_at), 'mock articles must keep original article link, author and date');
 
-function testHistoryDuplicateRules() {
-  const historyItem = attachArticleIdentity({
-    canonical_url: 'https://x.com/alice/articles/abc123',
-    title: 'How we built a reliable AI coding workflow',
-    author: 'Alice',
-    summary: 'A detailed framework for AI coding teams.'
-  });
-  const reason = duplicateReason({
-    canonical_url: 'https://twitter.com/alice/articles/abc123?utm_campaign=x',
-    title: 'How we built a reliable AI coding workflow',
-    author: 'Alice',
-    summary: 'A detailed framework for AI coding teams.'
-  }, [{
-    canonical_url: historyItem.canonical_url,
-    normalized_url: historyItem.normalized_url!,
-    article_id: historyItem.article_id!,
-    url_hash: historyItem.url_hash!,
-    content_hash: historyItem.content_hash!,
-    title_hash: historyItem.title_hash,
-    author_title_hash: historyItem.author_title_hash!,
-    near_title_hash: historyItem.near_title_hash!,
-    near_content_hash: historyItem.near_content_hash!,
-    author: historyItem.author || '',
-    title: historyItem.title,
-    summary: historyItem.summary,
-    shown_date: '2026-06-10',
-    source_file: 'data/issues/2026-06-10.json'
-  }]);
-  assert.match(reason, /historical/);
-}
+const filtered = filterArticles(articles, { topic: 'ai', lang: 'en', minBookmarks: '10', minLikes: '10' });
+assert(filtered.every(a => a.topic_id === 'ai' && a.lang === 'en'), 'filter logic should constrain topic and lang');
 
-testXArticleRules();
-testVerdict();
-testHistoryDuplicateRules();
-console.log('Tests passed: X Article detection, URL canonicalization, forbidden primary URLs, historical duplicate rules.');
+const byBookmarks = rankArticles(articles, 'bookmarks');
+assert(byBookmarks[0].metrics.bookmark_count >= byBookmarks[1].metrics.bookmark_count, 'bookmark sort should be descending');
+const byLikes = rankArticles(articles, 'likes');
+assert(byLikes[0].metrics.like_count >= byLikes[1].metrics.like_count, 'like sort should be descending');
+const byScore = rankArticles(articles, 'score');
+assert(byScore[0].score.article_score >= byScore[1].score.article_score, 'score sort should be descending');
+
+const emptyScore = computeArticleScore({});
+assert(Number.isFinite(emptyScore.article_score), 'score function must handle empty metrics');
+
+const pkg = readFileSync('package.json', 'utf8');
+assert(!/playwright|puppeteer|selenium/i.test(pkg), 'package must not include browser automation dependencies');
+const envExample = readFileSync('.env.example', 'utf8');
+assert(!/sk-[A-Za-z0-9]|xox[baprs]-|ghp_[A-Za-z0-9]/.test(envExample), 'env example must not contain real-looking secrets');
+
+console.log('✓ topics load correctly');
+console.log('✓ mock article dataset is complete');
+console.log('✓ filters and ranking pass');
+console.log('✓ scoring handles null metrics');
+console.log('✓ no browser automation dependency or obvious secret leakage detected');

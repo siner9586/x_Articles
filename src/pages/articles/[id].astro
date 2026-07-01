@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { articles } from '../../lib/mock-data';
+import { topicName } from '../../lib/topics';
+export function getStaticPaths() {
+  return articles.map(article => ({ params: { id: article.id }, props: { article } }));
+}
+const { article } = Astro.props;
+---
+<BaseLayout title={`${article.title} | X Articles Intelligence`}>
+  <section class="hero"><div class="container hero-card"><span class="eyebrow">Article Detail</span><h1>{article.title}</h1><p>@{article.author_username} / {article.author_name} · {topicName(article.topic_id)} · {new Date(article.created_at).toLocaleString('zh-CN')}</p><div class="actions"><a class="button primary" href={article.url} target="_blank" rel="noopener noreferrer">打开 X 原文核查</a></div></div></section>
+  <section class="container detail-grid">
+    <article class="panel">
+      {article.summary.confidence === 'low' && <p class="warning">摘要置信度较低，请打开原文核查。</p>}
+      <h2>一句话摘要</h2><p>{article.summary.one_sentence}</p>
+      <h2>中文摘要</h2><p>{article.summary.summary_zh}</p>
+      <h2>核心观点</h2><ul>{article.summary.key_points.map(point => <li>{point}</li>)}</ul>
+      <h2>学习笔记</h2><p>{article.summary.learning_notes}</p>
+      <h2>推荐用途</h2><div class="pills">{article.summary.recommended_use.map(use => <span class="pill">{use}</span>)}</div>
+      <h2>风险与局限</h2><p>{article.summary.limitations}</p>
+    </article>
+    <aside class="panel">
+      <h2>公开指标</h2>
+      <div class="stat-grid" style="grid-template-columns:1fr 1fr">
+        <div class="stat"><strong>{article.metrics.bookmark_count}</strong><span>收藏</span></div>
+        <div class="stat"><strong>{article.metrics.like_count}</strong><span>点赞</span></div>
+        <div class="stat"><strong>{article.metrics.quote_count}</strong><span>引用</span></div>
+        <div class="stat"><strong>{article.metrics.impression_count}</strong><span>浏览</span></div>
+      </div>
+      <h2>评分</h2>
+      <div class="pills"><span class="pill score">综合 {article.score.article_score}</span><span class="pill">学习 {article.score.learning_value_score}</span><span class="pill">研究 {article.score.research_value_score}</span><span class="pill">风险 {article.score.hype_risk_score}</span></div>
+      <h2>标签</h2><div class="pills">{article.tags.map(t => <span class="pill">{t.tag}</span>)}</div>
+      <h2>趋势快照</h2><p class="warning">MVP 使用 mock 数据。接入 D1 后由 x_article_snapshots 生成趋势。</p>
+    </aside>
+  </section>
+</BaseLayout>

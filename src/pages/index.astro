@@ -1,8 +1,52 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import IssueView from '../components/IssueView.astro';
-import latest from '../../public/index-data/latest.json';
+import ArticleCard from '../components/ArticleCard.astro';
+import { articles } from '../lib/mock-data';
+import { rankArticles } from '../lib/scoring';
+import { generateDailyReport } from '../lib/reports';
+import { topicName } from '../lib/topics';
+const ranked = rankArticles(articles, 'bookmarks');
+const top10 = ranked.slice(0, 10);
+const avgBookmarks = Math.round(articles.reduce((sum, item) => sum + item.metrics.bookmark_count, 0) / articles.length);
+const topTopics = [...new Set(ranked.slice(0, 12).map(item => topicName(item.topic_id)))].slice(0, 5);
+const report = generateDailyReport(articles);
 ---
-<BaseLayout title="X Articles Daily | 每日高质量 X Articles 与 AI 长文信号">
-  <IssueView issue={latest} />
+<BaseLayout>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-card">
+        <span class="eyebrow">Knowledge Radar · Official X MCP / API ready</span>
+        <h1>Discover highly bookmarked X Articles for learning new domains.</h1>
+        <p>多领域 X Articles 智能雷达：按收藏、点赞、综合价值、增长与小众质量发现适合学习、研究、写作和项目灵感的长文。</p>
+        <div class="stat-grid">
+          <div class="stat"><strong>{articles.length}</strong><span>今日发现</span></div>
+          <div class="stat"><strong>{articles.filter(a => a.metrics.bookmark_count >= 100).length}</strong><span>高收藏 Article</span></div>
+          <div class="stat"><strong>{avgBookmarks}</strong><span>平均收藏数</span></div>
+          <div class="stat"><strong>{topTopics[0]}</strong><span>Top 主题</span></div>
+        </div>
+      </div>
+      <aside class="panel">
+        <h2>今日学习地图</h2>
+        <ul class="learn-map">
+          {topTopics.map(topic => <li>{topic}</li>)}
+        </ul>
+        <p class="warning">当前为 mock 数据演示。配置 X_BEARER_TOKEN、D1 和 ADMIN_TOKEN 后可接入真实官方 X API / X MCP 路径。</p>
+        <a class="button primary" href="/reports/">查看日报</a>
+      </aside>
+    </div>
+  </section>
+  <section class="container layout">
+    <div>
+      <div class="panel" style="margin-bottom:16px"><h2>高收藏 Article 榜 Top 10</h2><p>默认按 bookmark_count 降序。卡片优先展示“为什么值得看”。</p></div>
+      <div class="article-list">
+        {top10.map((article, index) => <ArticleCard article={article} rank={index + 1} />)}
+      </div>
+    </div>
+    <aside class="panel">
+      <h2>最近生成日报</h2>
+      <p>{report.summary}</p>
+      <div class="pills">{report.topics.map(topic => <span class="pill">{topic}</span>)}</div>
+      <div class="actions"><a class="button" href="/reports/">复制 Markdown</a><a class="button" href="/api/health">API Health</a></div>
+    </aside>
+  </section>
 </BaseLayout>

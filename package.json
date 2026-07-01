@@ -1,28 +1,29 @@
 {
-  "name": "x-articles-daily",
-  "version": "0.2.0",
+  "name": "x-articles-intelligence",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "collect": "tsx scripts/collect-sources.ts",
-    "score": "tsx scripts/score-candidates.ts",
-    "build:issue": "tsx scripts/build-issue.ts",
-    "preflight": "tsx scripts/preflight.ts",
-    "state:rebuild": "tsx -e \"import('./scripts/history-index.ts').then(async m => { const idx = await m.rebuildShownIndex(''); await m.writeUsedItemsCompat(idx); console.log('rebuilt shown index', idx.length); })\"",
-    "indexes:rebuild": "tsx scripts/rebuild-indexes.ts",
-    "qa": "tsx scripts/qa.ts",
-    "test": "tsx scripts/test.ts",
+    "dev": "wrangler pages dev dist --compatibility-date=2026-07-02 -- npm run build",
+    "dev:ui": "astro dev",
     "build": "astro build",
-    "daily": "tsx scripts/daily.ts"
+    "preview": "npm run build && wrangler pages dev dist --compatibility-date=2026-07-02",
+    "test": "tsx scripts/test.ts",
+    "db:migrate": "wrangler d1 migrations apply x_articles --local",
+    "db:migrate:remote": "wrangler d1 migrations apply x_articles --remote",
+    "seed": "tsx scripts/seed.ts",
+    "collect": "tsx scripts/collect.ts",
+    "refresh-metrics": "tsx scripts/refresh-metrics.ts",
+    "reports:generate": "tsx scripts/generate-report.ts"
   },
   "dependencies": {
-    "astro": "^4.16.18",
-    "yaml": "^2.6.1"
+    "astro": "^4.16.18"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260702.0",
     "@types/node": "^20.17.9",
-    "playwright": "^1.51.1",
     "tsx": "^4.19.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "wrangler": "^4.24.3"
   }
 }

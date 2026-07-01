@@ -1,8 +1,0 @@
-links: []
-# Manually add public article URLs here. These are discovery inputs and are still scored/deduplicated.
-# Example:
-# - url: https://example.com/deep-dive
-#   title: Optional title
-#   source_platform: manual
-#   content_type: external_article
-#   tags: [agents, ai_coding]
