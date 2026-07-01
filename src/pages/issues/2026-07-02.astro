@@ -2,9 +2,9 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
 import { articles } from '../../lib/mock-data';
-import { generateDailyReport } from '../../lib/reports';
+import { generateIssueReport } from '../../lib/reports';
 import { rankArticles } from '../../lib/scoring';
-const report = generateDailyReport(articles, '2026-07-02');
+const report = generateIssueReport(articles, '2026-07-02');
 const top = rankArticles(articles, 'bookmarks').slice(0, 10);
 ---
 <BaseLayout title="第一期 | X Articles 高收藏学习精选">
