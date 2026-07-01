@@ -1,9 +1,9 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "types": ["@cloudflare/workers-types", "node"],
+    "types": ["node"],
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src", "scripts", "functions", "config"]
+  "include": ["src", "scripts", "functions", "config", "src/types/**/*.d.ts"]
 }
