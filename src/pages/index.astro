@@ -3,13 +3,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import { articles } from '../lib/mock-data';
 import { rankArticles } from '../lib/scoring';
-import { generateDailyReport } from '../lib/reports';
+import { generateIssueReport } from '../lib/reports';
 import { topicName } from '../lib/topics';
 const ranked = rankArticles(articles, 'bookmarks');
 const top10 = ranked.slice(0, 10);
 const avgBookmarks = Math.round(articles.reduce((sum, item) => sum + item.metrics.bookmark_count, 0) / articles.length);
 const topTopics = [...new Set(ranked.slice(0, 12).map(item => topicName(item.topic_id)))].slice(0, 5);
-const report = generateDailyReport(articles);
+const report = generateIssueReport(articles);
 ---
 <BaseLayout>
   <section class="hero">
