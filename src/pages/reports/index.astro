@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { generateDailyReport } from '../../lib/reports';
-const report = generateDailyReport();
+import { generateIssueReport } from '../../lib/reports';
+const report = generateIssueReport();
 ---
 <BaseLayout title="Reports | X Articles Intelligence">
   <section class="hero"><div class="container hero-card"><span class="eyebrow">报告 / 期刊</span><h1>{report.title}</h1><p>{report.summary}</p></div></section>
