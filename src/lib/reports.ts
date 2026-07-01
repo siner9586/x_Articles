@@ -16,10 +16,10 @@ export function generateDailyReport(input: XArticle[] = articles, date = '2026-0
     '哪些方法论可以迁移到自己的产品、论文或管理实践？'
   ];
   const markdown = [
-    `# 今日 X Articles 高收藏学习精选（${date}）`,
+    `# 本期 X Articles 高收藏学习精选（${date}）`,
     '',
     '## 总览',
-    `- 今日发现 Article 数量：${ranked.length}`,
+    `- 本期发现 Article 数量：${ranked.length}`,
     `- 高收藏 Article 数量：${highBookmarkCount}`,
     `- 主要主题：${topics.join('、')}`,
     '- 值得关注的新领域：AI Agent、稳定币分发、机器人数据管线、AI 决策权治理',
@@ -36,7 +36,7 @@ export function generateDailyReport(input: XArticle[] = articles, date = '2026-0
       `- 风险或局限：${item.summary.limitations}`
     ].join('\n')),
     '',
-    '## 今日学习地图',
+    '## 本期学习地图',
     ...topics.map(topic => `- ${topic}`),
     '',
     '## 值得深挖的问题',
@@ -44,9 +44,9 @@ export function generateDailyReport(input: XArticle[] = articles, date = '2026-0
   ].join('\n');
   return {
     report_date: date,
-    report_type: 'daily',
-    title: `今日 X Articles 高收藏学习精选（${date}）`,
-    summary: `今日共发现 ${ranked.length} 篇 mock Articles，高收藏 ${highBookmarkCount} 篇，覆盖 ${topics.join('、')}。`,
+    report_type: 'issue',
+    title: `本期 X Articles 高收藏学习精选（${date}）`,
+    summary: `本期共收录 ${ranked.length} 篇 mock/manual Articles，高收藏 ${highBookmarkCount} 篇，覆盖 ${topics.join('、')}。`,
     markdown,
     top,
     topics,
